@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,8 +11,13 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "@/components/ui/use-toast";
 
-const AddDiamondForm = () => {
+interface AddDiamondFormProps {
+  onCancel?: () => void;
+}
+
+const AddDiamondForm = ({ onCancel }: AddDiamondFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -23,8 +27,16 @@ const AddDiamondForm = () => {
     // Simulate API call
     setTimeout(() => {
       setIsSubmitting(false);
-      // Handle success or error here
+      toast({
+        title: "Diamond Added",
+        description: "The diamond has been successfully added to inventory.",
+      });
+      if (onCancel) onCancel(); // Return to previous view after successful submission
     }, 1000);
+  };
+  
+  const handleCancel = () => {
+    if (onCancel) onCancel();
   };
   
   return (
@@ -197,7 +209,7 @@ const AddDiamondForm = () => {
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button variant="outline">Cancel</Button>
+          <Button variant="outline" type="button" onClick={handleCancel}>Cancel</Button>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Adding..." : "Add Diamond"}
           </Button>

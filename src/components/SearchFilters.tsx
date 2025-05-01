@@ -11,7 +11,11 @@ import {
 import { CardHeader } from "@/components/ui/card";
 import { Filter, Search, Plus } from "lucide-react";
 
-const SearchFilters = () => {
+interface SearchFiltersProps {
+  onAddDiamond?: () => void;
+}
+
+const SearchFilters = ({ onAddDiamond }: SearchFiltersProps) => {
   return (
     <CardHeader className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
       <div className="space-y-2">
@@ -61,7 +65,7 @@ const SearchFilters = () => {
           <Filter className="mr-2 h-4 w-4" />
           More Filters
         </Button>
-        <Button className="flex-none">
+        <Button className="flex-none" onClick={onAddDiamond}>
           <Plus className="mr-2 h-4 w-4" />
           Add Diamond
         </Button>

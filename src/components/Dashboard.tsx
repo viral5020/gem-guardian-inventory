@@ -5,7 +5,11 @@ import { totalDiamonds, availableDiamonds, onMemoDiamonds, totalInventoryValue }
 import DiamondList from "./DiamondList";
 import { formatCurrency } from "@/lib/utils";
 
-const Dashboard = () => {
+interface DashboardProps {
+  onSelectDiamond?: (diamondId: string) => void;
+}
+
+const Dashboard = ({ onSelectDiamond }: DashboardProps) => {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Dashboard</h1>
@@ -39,7 +43,11 @@ const Dashboard = () => {
       
       <div className="py-4">
         <h2 className="text-xl font-bold mb-4">Recently Added Diamonds</h2>
-        <DiamondList showFilters={false} limit={5} />
+        <DiamondList 
+          showFilters={false} 
+          limit={5} 
+          onSelectDiamond={onSelectDiamond}
+        />
       </div>
     </div>
   );

@@ -19,16 +19,32 @@ import SearchFilters from "./SearchFilters";
 interface DiamondListProps {
   showFilters?: boolean;
   limit?: number;
+  onSelectDiamond?: (diamondId: string) => void;
+  onAddDiamond?: () => void;
 }
 
-const DiamondList = ({ showFilters = true, limit }: DiamondListProps) => {
+const DiamondList = ({ 
+  showFilters = true, 
+  limit,
+  onSelectDiamond,
+  onAddDiamond
+}: DiamondListProps) => {
   const [selectedDiamond, setSelectedDiamond] = useState<string | null>(null);
   
   const displayDiamonds = limit ? mockDiamonds.slice(0, limit) : mockDiamonds;
+
+  const handleViewDiamond = (diamondId: string) => {
+    setSelectedDiamond(diamondId);
+    if (onSelectDiamond) {
+      onSelectDiamond(diamondId);
+    }
+  };
   
   return (
     <Card>
-      {showFilters && <SearchFilters />}
+      {showFilters && (
+        <SearchFilters onAddDiamond={onAddDiamond} />
+      )}
       <CardContent className="p-0">
         <div className="rounded-md border">
           <Table>
@@ -68,7 +84,11 @@ const DiamondList = ({ showFilters = true, limit }: DiamondListProps) => {
                   <TableCell>{formatCurrency(diamond.retailPrice)}</TableCell>
                   <TableCell>{formatDate(diamond.lastModified)}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => handleViewDiamond(diamond.id)}
+                    >
                       <Eye className="h-4 w-4" />
                     </Button>
                   </TableCell>
