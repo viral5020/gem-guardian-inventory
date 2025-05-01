@@ -1,7 +1,9 @@
+
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import CustomerManagement from "@/components/CustomerManagement";
 import DiamondMemoManagement from "@/components/DiamondMemoManagement";
+import CustomerForm from "@/components/CustomerForm";
 import { toast } from "@/components/ui/use-toast";
 import { Customer, DiamondMemo } from "@/types/diamond";
 import { Button } from "@/components/ui/button";
@@ -99,6 +101,9 @@ const mockMemos: DiamondMemo[] = [
 
 const Customers = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
+  const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
+  const [isAddingCustomer, setIsAddingCustomer] = useState(false);
+  const [isEditingCustomer, setIsEditingCustomer] = useState(false);
   
   const handleSelectCustomer = (customerId: string) => {
     setSelectedCustomer(customerId);
@@ -109,10 +114,11 @@ const Customers = () => {
   };
   
   const handleAddCustomer = () => {
-    toast({
-      title: "Add Customer",
-      description: "This would open a customer creation form"
-    });
+    setIsAddingCustomer(true);
+  };
+
+  const handleEditCustomer = () => {
+    setIsEditingCustomer(true);
   };
   
   const handleMarkReturned = (memoId: string) => {
@@ -129,8 +135,37 @@ const Customers = () => {
     });
   };
 
+  const handleCustomerSubmit = (data: Omit<Customer, "id">) => {
+    const newCustomer = {
+      ...data,
+      id: `${customers.length + 1}`
+    } as Customer;
+    
+    setCustomers((prev) => [...prev, newCustomer]);
+    
+    toast({
+      title: "Customer Added",
+      description: `${data.name} has been added to your customers list.`
+    });
+  };
+
+  const handleCustomerUpdate = (data: Omit<Customer, "id">) => {
+    if (!selectedCustomer) return;
+    
+    setCustomers((prev) => 
+      prev.map((customer) => 
+        customer.id === selectedCustomer ? { ...data, id: customer.id } : customer
+      )
+    );
+    
+    toast({
+      title: "Customer Updated",
+      description: `${data.name}'s information has been updated.`
+    });
+  };
+
   const customer = selectedCustomer 
-    ? mockCustomers.find(c => c.id === selectedCustomer)
+    ? customers.find(c => c.id === selectedCustomer)
     : null;
 
   const customerMemos = mockMemos.filter(
@@ -148,9 +183,14 @@ const Customers = () => {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold">{customer.name}</h2>
-                <Button variant="outline" onClick={() => setSelectedCustomer(null)}>
-                  Back to All Customers
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={handleEditCustomer}>
+                    Edit Customer
+                  </Button>
+                  <Button variant="outline" onClick={() => setSelectedCustomer(null)}>
+                    Back to All Customers
+                  </Button>
+                </div>
               </div>
               
               <Card>
@@ -197,17 +237,37 @@ const Customers = () => {
               
               <DiamondMemoManagement 
                 memos={customerMemos} 
-                customers={mockCustomers} 
+                customers={customers} 
                 onMarkReturned={handleMarkReturned}
                 onMarkSold={handleMarkSold}
               />
+              
+              {/* Edit Customer Form */}
+              {customer && (
+                <CustomerForm 
+                  open={isEditingCustomer}
+                  onOpenChange={setIsEditingCustomer}
+                  initialData={customer}
+                  onSubmit={handleCustomerUpdate}
+                  title="Edit Customer"
+                />
+              )}
             </div>
           ) : (
-            <CustomerManagement 
-              customers={mockCustomers}
-              onAddCustomer={handleAddCustomer}
-              onSelectCustomer={handleSelectCustomer}
-            />
+            <>
+              <CustomerManagement 
+                customers={customers}
+                onAddCustomer={handleAddCustomer}
+                onSelectCustomer={handleSelectCustomer}
+              />
+              
+              {/* Add Customer Form */}
+              <CustomerForm 
+                open={isAddingCustomer}
+                onOpenChange={setIsAddingCustomer}
+                onSubmit={handleCustomerSubmit}
+              />
+            </>
           )}
         </div>
       </main>
