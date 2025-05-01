@@ -45,6 +45,34 @@ export interface Diamond {
   notes?: string;
   images?: string[];
   lastModified: string;
+  // Movement & History tracking
+  movementHistory?: DiamondMovement[];
+  // Kimberley Process certification
+  kimberleyProcess?: boolean;
+  // Laser inscription
+  laserInscription?: string;
+}
+
+export interface DiamondMovement {
+  id: string;
+  date: string;
+  fromLocation: LocationStatus;
+  toLocation: LocationStatus;
+  handledBy: string;
+  notes?: string;
+}
+
+export interface DiamondFilter {
+  shape?: DiamondShape;
+  cutMin?: CutGrade;
+  clarityMin?: ClarityGrade;
+  colorMin?: ColorGrade;
+  caratMin?: number;
+  caratMax?: number;
+  priceMin?: number;
+  priceMax?: number;
+  status?: InventoryStatus;
+  certLab?: CertificationLab;
 }
 
 export interface DashboardMetric {
@@ -52,4 +80,38 @@ export interface DashboardMetric {
   value: string | number;
   change?: number;
   icon: React.ComponentType<React.SVGAttributes<SVGElement>>;
+}
+
+export interface DiamondSale {
+  id: string;
+  diamondId: string;
+  saleDate: string;
+  customerId: string;
+  salePrice: number;
+  paymentMethod: string;
+  salesperson: string;
+  notes?: string;
+}
+
+export interface DiamondMemo {
+  id: string;
+  diamondId: string;
+  customerId: string;
+  startDate: string;
+  expectedEndDate: string;
+  actualReturnDate?: string;
+  status: 'Active' | 'Returned' | 'Sold' | 'Overdue';
+  notes?: string;
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  company?: string;
+  address?: string;
+  customerType: 'Retail' | 'Wholesale' | 'Dealer';
+  creditLimit?: number;
+  notes?: string;
 }

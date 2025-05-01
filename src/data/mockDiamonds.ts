@@ -1,5 +1,62 @@
 
-import { Diamond } from '../types/diamond';
+import { Diamond, DiamondMovement } from '../types/diamond';
+
+const mockMovements: Record<string, DiamondMovement[]> = {
+  '1': [
+    {
+      id: 'm1',
+      date: '2025-01-15',
+      fromLocation: 'Safe',
+      toLocation: 'Showroom',
+      handledBy: 'Emma Johnson',
+      notes: 'Moved for client appointment'
+    },
+    {
+      id: 'm2',
+      date: '2025-03-10',
+      fromLocation: 'Showroom',
+      toLocation: 'Customer Viewing',
+      handledBy: 'Michael Chen',
+      notes: 'Sent for client consideration'
+    },
+    {
+      id: 'm3',
+      date: '2025-03-15',
+      fromLocation: 'Customer Viewing',
+      toLocation: 'Showroom',
+      handledBy: 'Emma Johnson',
+      notes: 'Returned by client'
+    }
+  ],
+  '2': [
+    {
+      id: 'm4',
+      date: '2025-02-20',
+      fromLocation: 'In Transit',
+      toLocation: 'Safe',
+      handledBy: 'David Wilson',
+      notes: 'Received from supplier'
+    },
+    {
+      id: 'm5',
+      date: '2025-04-15',
+      fromLocation: 'Safe',
+      toLocation: 'Showroom',
+      handledBy: 'Emma Johnson',
+      notes: 'For display in main showcase'
+    }
+  ],
+  '3': [
+    {
+      id: 'm6',
+      date: '2025-03-10',
+      fromLocation: 'Safe',
+      toLocation: 'Customer Viewing',
+      handledBy: 'Michael Chen',
+      notes: 'Reserved for client'
+    }
+  ]
+};
 
 export const mockDiamonds: Diamond[] = [
   {
@@ -27,7 +84,10 @@ export const mockDiamonds: Diamond[] = [
     origin: 'Botswana',
     notes: 'Eye clean, excellent brilliance',
     images: ['/placeholder.svg'],
-    lastModified: '2025-04-28'
+    lastModified: '2025-04-28',
+    movementHistory: mockMovements['1'],
+    kimberleyProcess: true,
+    laserInscription: 'GIA 2141957190'
   },
   {
     id: '2',
@@ -54,7 +114,9 @@ export const mockDiamonds: Diamond[] = [
     origin: 'South Africa',
     notes: 'Slight bowtie effect',
     images: ['/placeholder.svg'],
-    lastModified: '2025-04-28'
+    lastModified: '2025-04-28',
+    movementHistory: mockMovements['2'],
+    kimberleyProcess: true
   },
   {
     id: '3',
@@ -80,7 +142,9 @@ export const mockDiamonds: Diamond[] = [
     tablePercentage: 64,
     origin: 'Russia',
     images: ['/placeholder.svg'],
-    lastModified: '2025-04-25'
+    lastModified: '2025-04-25',
+    movementHistory: mockMovements['3'],
+    laserInscription: 'IGI 9283716459'
   },
   {
     id: '4',
@@ -107,7 +171,9 @@ export const mockDiamonds: Diamond[] = [
     origin: 'Namibia',
     notes: 'Exceptional clarity, hall of mirrors effect',
     images: ['/placeholder.svg'],
-    lastModified: '2025-04-28'
+    lastModified: '2025-04-28',
+    kimberleyProcess: true,
+    laserInscription: 'GIA 6452789135'
   },
   {
     id: '5',
@@ -134,7 +200,8 @@ export const mockDiamonds: Diamond[] = [
     origin: 'Canada',
     notes: 'Ideal proportions',
     images: ['/placeholder.svg'],
-    lastModified: '2025-04-28'
+    lastModified: '2025-04-28',
+    kimberleyProcess: true
   },
   {
     id: '6',

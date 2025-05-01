@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
@@ -19,6 +20,8 @@ import {
   getStatusClass 
 } from "@/lib/utils";
 import { ArrowLeft, Edit, Package, Award, DollarSign } from "lucide-react";
+import DiamondMovementHistory from "./DiamondMovementHistory";
+import KimberleyProcessCertification from "./KimberleyProcessCertification";
 
 interface DiamondDetailProps {
   diamond: DiamondType;
@@ -156,6 +159,19 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
                 </Button>
               </div>
             </div>
+
+            {/* Laser Inscription */}
+            {diamond.laserInscription && (
+              <>
+                <Separator />
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Laser Inscription</h3>
+                  <p className="text-lg font-medium font-mono tracking-widest">
+                    {diamond.laserInscription}
+                  </p>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
         
@@ -209,6 +225,19 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Kimberley Process */}
+        <div className="lg:col-span-1">
+          <KimberleyProcessCertification 
+            hasCertification={diamond.kimberleyProcess || false}
+            origin={diamond.origin}
+          />
+        </div>
+
+        {/* Movement History */}
+        <div className="lg:col-span-2">
+          <DiamondMovementHistory movements={diamond.movementHistory} />
+        </div>
       </div>
     </div>
   );

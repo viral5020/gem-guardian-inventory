@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mockDiamonds } from "@/data/mockDiamonds";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const [selectedDiamond, setSelectedDiamond] = useState<string | null>(null);
@@ -28,6 +29,15 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 container mx-auto py-6 px-4 md:px-6">
+        <div className="mb-6 flex items-center justify-end space-x-2">
+          <Button variant="outline" asChild>
+            <Link to="/customers">Customer Management</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link to="/analytics">Analytics & Reports</Link>
+          </Button>
+        </div>
+        
         {isAddingDiamond ? (
           <AddDiamondForm onCancel={handleCancelAddDiamond} />
         ) : diamond ? (
