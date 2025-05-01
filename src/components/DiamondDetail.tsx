@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
@@ -19,7 +18,7 @@ import {
   getCutClass,
   getStatusClass 
 } from "@/lib/utils";
-import { ArrowLeft, Edit, Package, Certificate, DollarSign } from "lucide-react";
+import { ArrowLeft, Edit, Package, Award, DollarSign } from "lucide-react";
 
 interface DiamondDetailProps {
   diamond: DiamondType;
@@ -152,7 +151,7 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
                   <p className="text-lg font-medium">{diamond.certLab}</p>
                 </div>
                 <Button variant="outline" size="sm">
-                  <Certificate className="mr-2 h-4 w-4" />
+                  <Award className="mr-2 h-4 w-4" />
                   View Certificate
                 </Button>
               </div>
