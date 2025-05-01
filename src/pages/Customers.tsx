@@ -1,10 +1,13 @@
-
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import CustomerManagement from "@/components/CustomerManagement";
 import DiamondMemoManagement from "@/components/DiamondMemoManagement";
 import { toast } from "@/components/ui/use-toast";
 import { Customer, DiamondMemo } from "@/types/diamond";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "@/lib/utils";
 
 // Mock data for the customer page
 const mockCustomers: Customer[] = [
