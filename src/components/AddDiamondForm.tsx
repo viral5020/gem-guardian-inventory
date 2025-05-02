@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { Diamond } from "@/types/diamond";
-import { BarcodePrinter, Printer } from "lucide-react";
+import { Barcode, Printer } from "lucide-react";
 import { useReactToPrint } from "react-to-print";
 
 interface AddDiamondFormProps {
@@ -241,7 +242,7 @@ const AddDiamondForm = ({ onCancel, initialData }: AddDiamondFormProps) => {
                     variant="outline"
                     onClick={generateBarcode}
                   >
-                    <BarcodePrinter className="mr-2 h-4 w-4" />
+                    <Barcode className="mr-2 h-4 w-4" />
                     Generate
                   </Button>
                 </div>
