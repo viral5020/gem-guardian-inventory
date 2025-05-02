@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
@@ -10,7 +9,7 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Diamond as DiamondType, DiamondMovement, DiamondMemo } from "@/types/diamond";
+import { Diamond as DiamondType, DiamondMovement, DiamondMemo, LocationStatus } from "@/types/diamond";
 import { 
   formatCurrency, 
   formatDate, 
@@ -19,7 +18,7 @@ import {
   getCutClass,
   getStatusClass 
 } from "@/lib/utils";
-import { ArrowLeft, Edit, Package, Award, DollarSign, Plus, Trash, Calendar } from "lucide-react";
+import { ArrowLeft, Edit, Package, Award, DollarSign, Plus, Trash, Calendar, ArrowRight } from "lucide-react";
 import DiamondMovementHistory from "./DiamondMovementHistory";
 import KimberleyProcessCertification from "./KimberleyProcessCertification";
 import { useState } from "react";
@@ -57,6 +56,19 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
   const [selectedMemo, setSelectedMemo] = useState<DiamondMemo | null>(null);
   const [memos, setMemos] = useState<DiamondMemo[]>(diamond.memos || []);
   
+  // Movement history states
+  const [movements, setMovements] = useState<DiamondMovement[]>(diamond.movementHistory || []);
+  const [isAddingMovement, setIsAddingMovement] = useState(false);
+  const [isEditingMovement, setIsEditingMovement] = useState(false);
+  const [selectedMovement, setSelectedMovement] = useState<DiamondMovement | null>(null);
+  
+  // Movement form states
+  const [moveDate, setMoveDate] = useState("");
+  const [moveFromLocation, setMoveFromLocation] = useState<LocationStatus>("Safe");
+  const [moveToLocation, setMoveToLocation] = useState<LocationStatus>("Safe");
+  const [moveHandledBy, setMoveHandledBy] = useState("");
+  const [moveNotes, setMoveNotes] = useState("");
+  
   // Memo form states
   const [memoCustomerId, setMemoCustomerId] = useState("");
   const [memoStartDate, setMemoStartDate] = useState("");
@@ -80,12 +92,13 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
   };
 
   const handleEditSuccess = (updatedDiamond: DiamondType) => {
-    const updatedWithMemos = {
+    const updatedWithMemosAndMovements = {
       ...updatedDiamond, 
       id: diamond.id,
-      memos: memos
+      memos: memos,
+      movementHistory: movements
     };
-    setCurrentDiamond(updatedWithMemos);
+    setCurrentDiamond(updatedWithMemosAndMovements);
     setIsEditing(false);
   };
 
@@ -191,6 +204,91 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
       title: "Memo Updated",
       description: "Memo marked as sold."
     });
+  };
+  
+  const handleAddMovement = () => {
+    setMoveDate(new Date().toISOString().split("T")[0]);
+    setMoveFromLocation(currentDiamond.location);
+    setMoveToLocation("Safe");
+    setMoveHandledBy("");
+    setMoveNotes("");
+    setIsAddingMovement(true);
+  };
+
+  const handleEditMovement = (movement: DiamondMovement) => {
+    setSelectedMovement(movement);
+    setMoveDate(movement.date);
+    setMoveFromLocation(movement.fromLocation);
+    setMoveToLocation(movement.toLocation);
+    setMoveHandledBy(movement.handledBy);
+    setMoveNotes(movement.notes || "");
+    setIsEditingMovement(true);
+  };
+
+  const handleDeleteMovement = (movementId: string) => {
+    setMovements(movements.filter(movement => movement.id !== movementId));
+    toast({
+      title: "Movement Deleted",
+      description: "The movement record has been successfully deleted."
+    });
+  };
+
+  const handleSubmitMovement = () => {
+    if (!moveDate || !moveFromLocation || !moveToLocation || !moveHandledBy) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (isEditingMovement && selectedMovement) {
+      // Update existing movement
+      const updatedMovements = movements.map(movement => 
+        movement.id === selectedMovement.id 
+          ? { 
+              ...movement, 
+              date: moveDate,
+              fromLocation: moveFromLocation,
+              toLocation: moveToLocation,
+              handledBy: moveHandledBy,
+              notes: moveNotes
+            } 
+          : movement
+      );
+      setMovements(updatedMovements);
+      toast({
+        title: "Movement Updated",
+        description: "The movement record has been successfully updated."
+      });
+    } else {
+      // Add new movement
+      const newMovement: DiamondMovement = {
+        id: `movement-${Date.now()}`,
+        date: moveDate,
+        fromLocation: moveFromLocation,
+        toLocation: moveToLocation,
+        handledBy: moveHandledBy,
+        notes: moveNotes
+      };
+      
+      // Update diamond location to match the new movement's destination
+      setCurrentDiamond({
+        ...currentDiamond,
+        location: moveToLocation
+      });
+      
+      setMovements([...movements, newMovement]);
+      toast({
+        title: "Movement Added",
+        description: "A new movement record has been added and the diamond location has been updated."
+      });
+    }
+
+    setIsAddingMovement(false);
+    setIsEditingMovement(false);
+    setSelectedMovement(null);
   };
   
   return (
@@ -416,7 +514,22 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
 
             {/* Movement History */}
             <div className="lg:col-span-2">
-              <DiamondMovementHistory movements={currentDiamond.movementHistory} />
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Movement History</CardTitle>
+                  <Button size="sm" onClick={handleAddMovement}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Movement
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <DiamondMovementHistory 
+                    movements={movements}
+                    onEditMovement={handleEditMovement}
+                    onDeleteMovement={handleDeleteMovement}
+                  />
+                </CardContent>
+              </Card>
             </div>
             
             {/* Diamond Memos */}
@@ -446,7 +559,189 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
         </div>
       )}
 
-      {/* Add Memo Dialog */}
+      {/* Add Movement Dialog */}
+      <Dialog open={isAddingMovement} onOpenChange={setIsAddingMovement}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Movement Record</DialogTitle>
+            <DialogDescription>
+              Record a new location change for this diamond.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="moveDate" className="text-sm font-medium">Date</label>
+              <Input 
+                id="moveDate"
+                type="date"
+                value={moveDate}
+                onChange={e => setMoveDate(e.target.value)}
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="fromLocation" className="text-sm font-medium">From Location</label>
+                <Select 
+                  value={moveFromLocation}
+                  onValueChange={(value) => setMoveFromLocation(value as LocationStatus)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Safe">Safe</SelectItem>
+                    <SelectItem value="Showroom">Showroom</SelectItem>
+                    <SelectItem value="In Transit">In Transit</SelectItem>
+                    <SelectItem value="Customer Viewing">Customer Viewing</SelectItem>
+                    <SelectItem value="Workshop">Workshop</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="toLocation" className="text-sm font-medium">To Location</label>
+                <Select 
+                  value={moveToLocation}
+                  onValueChange={(value) => setMoveToLocation(value as LocationStatus)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Safe">Safe</SelectItem>
+                    <SelectItem value="Showroom">Showroom</SelectItem>
+                    <SelectItem value="In Transit">In Transit</SelectItem>
+                    <SelectItem value="Customer Viewing">Customer Viewing</SelectItem>
+                    <SelectItem value="Workshop">Workshop</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="handledBy" className="text-sm font-medium">Handled By</label>
+              <Input 
+                id="handledBy"
+                type="text"
+                placeholder="Enter staff name"
+                value={moveHandledBy}
+                onChange={e => setMoveHandledBy(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="notes" className="text-sm font-medium">Notes</label>
+              <Textarea 
+                id="notes"
+                placeholder="Add notes about this movement..."
+                value={moveNotes}
+                onChange={e => setMoveNotes(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddingMovement(false)}>Cancel</Button>
+            <Button onClick={handleSubmitMovement}>
+              {isEditingMovement ? "Update Movement" : "Add Movement"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Edit Movement Dialog */}
+      <Dialog open={isEditingMovement} onOpenChange={setIsEditingMovement}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Movement Record</DialogTitle>
+            <DialogDescription>
+              Update this movement record.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="moveDate" className="text-sm font-medium">Date</label>
+              <Input 
+                id="moveDate"
+                type="date"
+                value={moveDate}
+                onChange={e => setMoveDate(e.target.value)}
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="fromLocation" className="text-sm font-medium">From Location</label>
+                <Select 
+                  value={moveFromLocation}
+                  onValueChange={(value) => setMoveFromLocation(value as LocationStatus)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Safe">Safe</SelectItem>
+                    <SelectItem value="Showroom">Showroom</SelectItem>
+                    <SelectItem value="In Transit">In Transit</SelectItem>
+                    <SelectItem value="Customer Viewing">Customer Viewing</SelectItem>
+                    <SelectItem value="Workshop">Workshop</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="toLocation" className="text-sm font-medium">To Location</label>
+                <Select 
+                  value={moveToLocation}
+                  onValueChange={(value) => setMoveToLocation(value as LocationStatus)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Safe">Safe</SelectItem>
+                    <SelectItem value="Showroom">Showroom</SelectItem>
+                    <SelectItem value="In Transit">In Transit</SelectItem>
+                    <SelectItem value="Customer Viewing">Customer Viewing</SelectItem>
+                    <SelectItem value="Workshop">Workshop</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="handledBy" className="text-sm font-medium">Handled By</label>
+              <Input 
+                id="handledBy"
+                type="text"
+                placeholder="Enter staff name"
+                value={moveHandledBy}
+                onChange={e => setMoveHandledBy(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="notes" className="text-sm font-medium">Notes</label>
+              <Textarea 
+                id="notes"
+                placeholder="Add notes about this movement..."
+                value={moveNotes}
+                onChange={e => setMoveNotes(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditingMovement(false)}>Cancel</Button>
+            <Button onClick={handleSubmitMovement}>Update Movement</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Add/Edit Memo Dialogs */}
       <Dialog open={isAddingMemo} onOpenChange={setIsAddingMemo}>
         <DialogContent>
           <DialogHeader>
