@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,24 +12,59 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
+import { Diamond } from "@/types/diamond";
+import { BarcodePrinter, Printer } from "lucide-react";
+import { useReactToPrint } from "react-to-print";
 
 interface AddDiamondFormProps {
   onCancel?: () => void;
+  initialData?: Diamond;
 }
 
-const AddDiamondForm = ({ onCancel }: AddDiamondFormProps) => {
+const AddDiamondForm = ({ onCancel, initialData }: AddDiamondFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sku, setSku] = useState(initialData?.sku || "");
+  const [shape, setShape] = useState(initialData?.shape || "");
+  const [carat, setCarat] = useState(initialData?.carat?.toString() || "");
+  const [cut, setCut] = useState(initialData?.cut || "");
+  const [clarity, setClarity] = useState(initialData?.clarity || "");
+  const [color, setColor] = useState(initialData?.color || "");
+  const [barcodeData, setBarcodeData] = useState("");
+  const printRef = useRef<HTMLDivElement>(null);
+
+  // Generate barcode based on diamond details
+  const generateBarcode = () => {
+    if (sku && shape && carat && cut && clarity && color) {
+      const data = `${sku}-${shape.substring(0, 2)}-${carat}-${cut.substring(0, 1)}-${clarity}-${color}`;
+      setBarcodeData(data);
+      toast({
+        title: "Barcode Generated",
+        description: `Barcode data: ${data}`,
+      });
+      return data;
+    }
+    return "";
+  };
+  
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+  });
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
+    // Generate barcode if not already generated
+    if (!barcodeData) {
+      generateBarcode();
+    }
+    
     // Simulate API call
     setTimeout(() => {
       setIsSubmitting(false);
       toast({
-        title: "Diamond Added",
-        description: "The diamond has been successfully added to inventory.",
+        title: initialData ? "Diamond Updated" : "Diamond Added",
+        description: initialData ? "The diamond has been successfully updated." : "The diamond has been successfully added to inventory.",
       });
       if (onCancel) onCancel(); // Return to previous view after successful submission
     }, 1000);
@@ -38,13 +73,46 @@ const AddDiamondForm = ({ onCancel }: AddDiamondFormProps) => {
   const handleCancel = () => {
     if (onCancel) onCancel();
   };
+
+  // Auto-generate barcode on field changes
+  const handleFieldChange = (field: string, value: string) => {
+    switch (field) {
+      case "sku":
+        setSku(value);
+        break;
+      case "shape":
+        setShape(value);
+        break;
+      case "carat":
+        setCarat(value);
+        break;
+      case "cut":
+        setCut(value);
+        break;
+      case "clarity":
+        setClarity(value);
+        break;
+      case "color":
+        setColor(value);
+        break;
+      default:
+        break;
+    }
+    
+    // Auto-generate barcode only if we have enough info
+    setTimeout(() => {
+      if (sku && shape && carat && cut && clarity && color) {
+        generateBarcode();
+      }
+    }, 100);
+  };
   
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
-        <CardTitle>Add New Diamond</CardTitle>
+        <CardTitle>{initialData ? "Edit Diamond" : "Add New Diamond"}</CardTitle>
         <CardDescription>
-          Enter the details of the new diamond to add to inventory.
+          {initialData ? "Update the details of this diamond." : "Enter the details of the new diamond to add to inventory."}
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
@@ -55,25 +123,30 @@ const AddDiamondForm = ({ onCancel }: AddDiamondFormProps) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="sku">SKU</Label>
-                <Input id="sku" placeholder="e.g. DM-RD-101" />
+                <Input 
+                  id="sku" 
+                  placeholder="e.g. DM-RD-101" 
+                  value={sku}
+                  onChange={(e) => handleFieldChange("sku", e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="shape">Shape</Label>
-                <Select>
+                <Select value={shape} onValueChange={(value) => handleFieldChange("shape", value)}>
                   <SelectTrigger id="shape">
                     <SelectValue placeholder="Select shape" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="round">Round</SelectItem>
-                    <SelectItem value="princess">Princess</SelectItem>
-                    <SelectItem value="cushion">Cushion</SelectItem>
-                    <SelectItem value="emerald">Emerald</SelectItem>
-                    <SelectItem value="oval">Oval</SelectItem>
-                    <SelectItem value="radiant">Radiant</SelectItem>
-                    <SelectItem value="asscher">Asscher</SelectItem>
-                    <SelectItem value="marquise">Marquise</SelectItem>
-                    <SelectItem value="pear">Pear</SelectItem>
-                    <SelectItem value="heart">Heart</SelectItem>
+                    <SelectItem value="Round">Round</SelectItem>
+                    <SelectItem value="Princess">Princess</SelectItem>
+                    <SelectItem value="Cushion">Cushion</SelectItem>
+                    <SelectItem value="Emerald">Emerald</SelectItem>
+                    <SelectItem value="Oval">Oval</SelectItem>
+                    <SelectItem value="Radiant">Radiant</SelectItem>
+                    <SelectItem value="Asscher">Asscher</SelectItem>
+                    <SelectItem value="Marquise">Marquise</SelectItem>
+                    <SelectItem value="Pear">Pear</SelectItem>
+                    <SelectItem value="Heart">Heart</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -86,64 +159,123 @@ const AddDiamondForm = ({ onCancel }: AddDiamondFormProps) => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="carat">Carat Weight</Label>
-                <Input id="carat" type="number" step="0.01" placeholder="0.00" />
+                <Input 
+                  id="carat" 
+                  type="number" 
+                  step="0.01" 
+                  placeholder="0.00" 
+                  value={carat}
+                  onChange={(e) => handleFieldChange("carat", e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="cut">Cut</Label>
-                <Select>
+                <Select value={cut} onValueChange={(value) => handleFieldChange("cut", value)}>
                   <SelectTrigger id="cut">
                     <SelectValue placeholder="Select cut" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="excellent">Excellent</SelectItem>
-                    <SelectItem value="very-good">Very Good</SelectItem>
-                    <SelectItem value="good">Good</SelectItem>
-                    <SelectItem value="fair">Fair</SelectItem>
-                    <SelectItem value="poor">Poor</SelectItem>
+                    <SelectItem value="Excellent">Excellent</SelectItem>
+                    <SelectItem value="Very Good">Very Good</SelectItem>
+                    <SelectItem value="Good">Good</SelectItem>
+                    <SelectItem value="Fair">Fair</SelectItem>
+                    <SelectItem value="Poor">Poor</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="clarity">Clarity</Label>
-                <Select>
+                <Select value={clarity} onValueChange={(value) => handleFieldChange("clarity", value)}>
                   <SelectTrigger id="clarity">
                     <SelectValue placeholder="Select clarity" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="fl">FL</SelectItem>
-                    <SelectItem value="if">IF</SelectItem>
-                    <SelectItem value="vvs1">VVS1</SelectItem>
-                    <SelectItem value="vvs2">VVS2</SelectItem>
-                    <SelectItem value="vs1">VS1</SelectItem>
-                    <SelectItem value="vs2">VS2</SelectItem>
-                    <SelectItem value="si1">SI1</SelectItem>
-                    <SelectItem value="si2">SI2</SelectItem>
-                    <SelectItem value="i1">I1</SelectItem>
-                    <SelectItem value="i2">I2</SelectItem>
-                    <SelectItem value="i3">I3</SelectItem>
+                    <SelectItem value="FL">FL</SelectItem>
+                    <SelectItem value="IF">IF</SelectItem>
+                    <SelectItem value="VVS1">VVS1</SelectItem>
+                    <SelectItem value="VVS2">VVS2</SelectItem>
+                    <SelectItem value="VS1">VS1</SelectItem>
+                    <SelectItem value="VS2">VS2</SelectItem>
+                    <SelectItem value="SI1">SI1</SelectItem>
+                    <SelectItem value="SI2">SI2</SelectItem>
+                    <SelectItem value="I1">I1</SelectItem>
+                    <SelectItem value="I2">I2</SelectItem>
+                    <SelectItem value="I3">I3</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="color">Color</Label>
-                <Select>
+                <Select value={color} onValueChange={(value) => handleFieldChange("color", value)}>
                   <SelectTrigger id="color">
                     <SelectValue placeholder="Select color" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="d">D</SelectItem>
-                    <SelectItem value="e">E</SelectItem>
-                    <SelectItem value="f">F</SelectItem>
-                    <SelectItem value="g">G</SelectItem>
-                    <SelectItem value="h">H</SelectItem>
-                    <SelectItem value="i">I</SelectItem>
-                    <SelectItem value="j">J</SelectItem>
-                    <SelectItem value="k">K</SelectItem>
-                    <SelectItem value="l">L</SelectItem>
-                    <SelectItem value="m">M</SelectItem>
-                    <SelectItem value="z+">Z+</SelectItem>
+                    <SelectItem value="D">D</SelectItem>
+                    <SelectItem value="E">E</SelectItem>
+                    <SelectItem value="F">F</SelectItem>
+                    <SelectItem value="G">G</SelectItem>
+                    <SelectItem value="H">H</SelectItem>
+                    <SelectItem value="I">I</SelectItem>
+                    <SelectItem value="J">J</SelectItem>
+                    <SelectItem value="K">K</SelectItem>
+                    <SelectItem value="L">L</SelectItem>
+                    <SelectItem value="M">M</SelectItem>
+                    <SelectItem value="Z+">Z+</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+          </div>
+          
+          {/* Barcode Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Diamond Barcode</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Label htmlFor="barcode">Barcode</Label>
+                  <Button 
+                    type="button" 
+                    size="sm" 
+                    variant="outline"
+                    onClick={generateBarcode}
+                  >
+                    <BarcodePrinter className="mr-2 h-4 w-4" />
+                    Generate
+                  </Button>
+                </div>
+                <div className="p-4 bg-gray-50 border rounded-md min-h-[100px] flex flex-col items-center justify-center">
+                  {barcodeData ? (
+                    <div ref={printRef} className="text-center">
+                      <div className="font-mono text-sm mb-2">{barcodeData}</div>
+                      <div className="h-16 bg-gray-800 flex items-center justify-center text-white font-mono text-xs px-4">
+                        {Array.from(barcodeData).map((char, index) => (
+                          <div key={index} className="mx-[0.5px] h-full" style={{
+                            width: Math.floor(Math.random() * 3) + 1 + 'px', 
+                            backgroundColor: Math.random() > 0.5 ? 'white' : 'black'
+                          }}></div>
+                        ))}
+                      </div>
+                      <div className="mt-2 text-xs">{sku}</div>
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">
+                      Complete the diamond details to generate a barcode
+                    </span>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  disabled={!barcodeData}
+                  onClick={handlePrint}
+                >
+                  <Printer className="mr-2 h-4 w-4" />
+                  Print Barcode
+                </Button>
               </div>
             </div>
           </div>
@@ -211,7 +343,7 @@ const AddDiamondForm = ({ onCancel }: AddDiamondFormProps) => {
         <CardFooter className="flex justify-between">
           <Button variant="outline" type="button" onClick={handleCancel}>Cancel</Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Adding..." : "Add Diamond"}
+            {isSubmitting ? (initialData ? "Updating..." : "Adding...") : (initialData ? "Update Diamond" : "Add Diamond")}
           </Button>
         </CardFooter>
       </form>
