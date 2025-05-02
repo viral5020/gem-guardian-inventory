@@ -47,6 +47,8 @@ export interface Diamond {
   lastModified: string;
   // Movement & History tracking
   movementHistory?: DiamondMovement[];
+  // Memo history
+  memos?: DiamondMemo[];
   // Kimberley Process certification
   kimberleyProcess?: boolean;
   // Laser inscription

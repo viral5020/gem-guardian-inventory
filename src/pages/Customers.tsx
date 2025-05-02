@@ -10,6 +10,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Plus } from "lucide-react";
 
 // Mock data for the customer page
 const mockCustomers: Customer[] = [
@@ -99,11 +110,31 @@ const mockMemos: DiamondMemo[] = [
   }
 ];
 
+// Mock diamonds for demo purposes
+const mockDiamonds = [
+  { id: "1", name: "1.02ct Round D IF" },
+  { id: "2", name: "2.15ct Emerald E VS1" },
+  { id: "3", name: "0.75ct Princess G VS2" },
+  { id: "4", name: "1.53ct Oval F VVS2" },
+];
+
 const Customers = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
   const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
   const [isAddingCustomer, setIsAddingCustomer] = useState(false);
   const [isEditingCustomer, setIsEditingCustomer] = useState(false);
+  
+  // Memo management states
+  const [customerMemos, setCustomerMemos] = useState<DiamondMemo[]>(mockMemos);
+  const [isAddingMemo, setIsAddingMemo] = useState(false);
+  const [isEditingMemo, setIsEditingMemo] = useState(false);
+  const [selectedMemo, setSelectedMemo] = useState<DiamondMemo | null>(null);
+  
+  // Memo form states
+  const [memoDiamondId, setMemoDiamondId] = useState("");
+  const [memoStartDate, setMemoStartDate] = useState("");
+  const [memoExpectedEndDate, setMemoExpectedEndDate] = useState("");
+  const [memoNotes, setMemoNotes] = useState("");
   
   const handleSelectCustomer = (customerId: string) => {
     setSelectedCustomer(customerId);
@@ -122,6 +153,16 @@ const Customers = () => {
   };
   
   const handleMarkReturned = (memoId: string) => {
+    setCustomerMemos(customerMemos.map(memo => 
+      memo.id === memoId 
+        ? { 
+            ...memo, 
+            status: "Returned",
+            actualReturnDate: new Date().toISOString().split("T")[0]
+          } 
+        : memo
+    ));
+    
     toast({
       title: "Memo Updated",
       description: `Memo ${memoId} marked as returned`
@@ -129,6 +170,12 @@ const Customers = () => {
   };
   
   const handleMarkSold = (memoId: string) => {
+    setCustomerMemos(customerMemos.map(memo => 
+      memo.id === memoId 
+        ? { ...memo, status: "Sold" } 
+        : memo
+    ));
+    
     toast({
       title: "Memo Updated",
       description: `Memo ${memoId} marked as sold`
@@ -164,11 +211,87 @@ const Customers = () => {
     });
   };
 
+  const handleAddMemo = () => {
+    setMemoDiamondId("");
+    setMemoStartDate(new Date().toISOString().split("T")[0]);
+    setMemoExpectedEndDate("");
+    setMemoNotes("");
+    setIsAddingMemo(true);
+  };
+
+  const handleEditMemo = (memo: DiamondMemo) => {
+    setSelectedMemo(memo);
+    setMemoDiamondId(memo.diamondId);
+    setMemoStartDate(memo.startDate);
+    setMemoExpectedEndDate(memo.expectedEndDate);
+    setMemoNotes(memo.notes || "");
+    setIsEditingMemo(true);
+  };
+
+  const handleDeleteMemo = (memoId: string) => {
+    setCustomerMemos(customerMemos.filter(memo => memo.id !== memoId));
+    toast({
+      title: "Memo Deleted",
+      description: "The memo has been successfully deleted."
+    });
+  };
+
+  const handleSubmitMemo = () => {
+    if (!memoDiamondId || !memoStartDate || !memoExpectedEndDate) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (isEditingMemo && selectedMemo) {
+      // Update existing memo
+      const updatedMemos = customerMemos.map(memo => 
+        memo.id === selectedMemo.id 
+          ? { 
+              ...memo, 
+              diamondId: memoDiamondId,
+              startDate: memoStartDate,
+              expectedEndDate: memoExpectedEndDate,
+              notes: memoNotes
+            } 
+          : memo
+      );
+      setCustomerMemos(updatedMemos);
+      toast({
+        title: "Memo Updated",
+        description: "The memo has been successfully updated."
+      });
+    } else {
+      // Add new memo
+      const newMemo: DiamondMemo = {
+        id: `memo-${Date.now()}`,
+        diamondId: memoDiamondId,
+        customerId: selectedCustomer || "",
+        startDate: memoStartDate,
+        expectedEndDate: memoExpectedEndDate,
+        status: "Active",
+        notes: memoNotes
+      };
+      setCustomerMemos([...customerMemos, newMemo]);
+      toast({
+        title: "Memo Created",
+        description: "A new memo has been successfully created."
+      });
+    }
+
+    setIsAddingMemo(false);
+    setIsEditingMemo(false);
+    setSelectedMemo(null);
+  };
+
   const customer = selectedCustomer 
     ? customers.find(c => c.id === selectedCustomer)
     : null;
 
-  const customerMemos = mockMemos.filter(
+  const filteredMemos = customerMemos.filter(
     memo => customer && memo.customerId === customer.id
   );
 
@@ -235,11 +358,21 @@ const Customers = () => {
                 </CardContent>
               </Card>
               
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-semibold">Diamond Memos</h3>
+                <Button onClick={handleAddMemo}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create Memo
+                </Button>
+              </div>
+              
               <DiamondMemoManagement 
-                memos={customerMemos} 
+                memos={filteredMemos} 
                 customers={customers} 
                 onMarkReturned={handleMarkReturned}
                 onMarkSold={handleMarkSold}
+                onEditMemo={handleEditMemo}
+                onDeleteMemo={handleDeleteMemo}
               />
               
               {/* Edit Customer Form */}
@@ -252,6 +385,87 @@ const Customers = () => {
                   title="Edit Customer"
                 />
               )}
+              
+              {/* Add/Edit Memo Dialog */}
+              <Dialog open={isAddingMemo || isEditingMemo} 
+                onOpenChange={(open) => {
+                  if (!open) {
+                    setIsAddingMemo(false);
+                    setIsEditingMemo(false);
+                  }
+                }}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{isEditingMemo ? "Edit Memo" : "Create New Memo"}</DialogTitle>
+                    <DialogDescription>
+                      {isEditingMemo 
+                        ? "Update details for this diamond memo" 
+                        : "Create a new diamond memo for this customer"}
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <label htmlFor="diamond" className="text-sm font-medium">Diamond</label>
+                      <select 
+                        id="diamond"
+                        className="w-full p-2 border rounded"
+                        value={memoDiamondId}
+                        onChange={e => setMemoDiamondId(e.target.value)}
+                      >
+                        <option value="">Select a diamond</option>
+                        {mockDiamonds.map(diamond => (
+                          <option key={diamond.id} value={diamond.id}>
+                            {diamond.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label htmlFor="startDate" className="text-sm font-medium">Start Date</label>
+                        <Input 
+                          id="startDate"
+                          type="date"
+                          value={memoStartDate}
+                          onChange={e => setMemoStartDate(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <label htmlFor="endDate" className="text-sm font-medium">Expected Return Date</label>
+                        <Input 
+                          id="endDate"
+                          type="date"
+                          value={memoExpectedEndDate}
+                          onChange={e => setMemoExpectedEndDate(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label htmlFor="notes" className="text-sm font-medium">Notes</label>
+                      <Textarea 
+                        id="notes"
+                        placeholder="Add notes about this memo..."
+                        value={memoNotes}
+                        onChange={e => setMemoNotes(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => {
+                      setIsAddingMemo(false);
+                      setIsEditingMemo(false);
+                    }}>Cancel</Button>
+                    <Button onClick={handleSubmitMemo}>
+                      {isEditingMemo ? "Update Memo" : "Create Memo"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           ) : (
             <>

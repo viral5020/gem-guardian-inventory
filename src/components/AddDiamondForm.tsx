@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +12,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
-import { Diamond } from "@/types/diamond";
+import { Diamond, DiamondShape, CutGrade, ClarityGrade, ColorGrade, CertificationLab } from "@/types/diamond";
 import { Barcode, Printer } from "lucide-react";
 import { useReactToPrint } from "react-to-print";
 
@@ -26,14 +25,14 @@ interface AddDiamondFormProps {
 const AddDiamondForm = ({ onCancel, onSuccess, initialData }: AddDiamondFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sku, setSku] = useState(initialData?.sku || "");
-  const [shape, setShape] = useState(initialData?.shape || "");
+  const [shape, setShape] = useState<DiamondShape>(initialData?.shape || "Round");
   const [carat, setCarat] = useState(initialData?.carat?.toString() || "");
-  const [cut, setCut] = useState(initialData?.cut || "");
-  const [clarity, setClarity] = useState(initialData?.clarity || "");
-  const [color, setColor] = useState(initialData?.color || "");
+  const [cut, setCut] = useState<CutGrade>(initialData?.cut || "Excellent");
+  const [clarity, setClarity] = useState<ClarityGrade>(initialData?.clarity || "FL");
+  const [color, setColor] = useState<ColorGrade>(initialData?.color || "D");
   const [barcodeData, setBarcodeData] = useState("");
   const [certNumber, setCertNumber] = useState(initialData?.certNumber || "");
-  const [certLab, setCertLab] = useState(initialData?.certLab || "");
+  const [certLab, setCertLab] = useState<CertificationLab>(initialData?.certLab || "GIA");
   const [costPrice, setCostPrice] = useState(initialData?.costPrice?.toString() || "");
   const [retailPrice, setRetailPrice] = useState(initialData?.retailPrice?.toString() || "");
   const [notes, setNotes] = useState(initialData?.notes || "");
@@ -82,6 +81,18 @@ const AddDiamondForm = ({ onCancel, onSuccess, initialData }: AddDiamondFormProp
       retailPrice: parseFloat(retailPrice),
       notes,
       lastModified: new Date().toISOString().split('T')[0],
+      // Keep other required fields with default values if not present in initialData
+      fluorescence: initialData?.fluorescence || 'None',
+      polish: initialData?.polish || 'Excellent',
+      symmetry: initialData?.symmetry || 'Excellent',
+      location: initialData?.location || 'Safe',
+      status: initialData?.status || 'Available',
+      procurementType: initialData?.procurementType || 'Direct Purchase',
+      procurementDate: initialData?.procurementDate || new Date().toISOString().split('T')[0],
+      measurements: initialData?.measurements || '0 x 0 x 0',
+      depthPercentage: initialData?.depthPercentage || 0,
+      tablePercentage: initialData?.tablePercentage || 0,
+      memos: initialData?.memos || []
     };
     
     // Simulate API call
@@ -113,25 +124,25 @@ const AddDiamondForm = ({ onCancel, onSuccess, initialData }: AddDiamondFormProp
         setSku(value);
         break;
       case "shape":
-        setShape(value);
+        setShape(value as DiamondShape);
         break;
       case "carat":
         setCarat(value);
         break;
       case "cut":
-        setCut(value);
+        setCut(value as CutGrade);
         break;
       case "clarity":
-        setClarity(value);
+        setClarity(value as ClarityGrade);
         break;
       case "color":
-        setColor(value);
+        setColor(value as ColorGrade);
         break;
       case "certNumber":
         setCertNumber(value);
         break;
       case "certLab":
-        setCertLab(value);
+        setCertLab(value as CertificationLab);
         break;
       case "costPrice":
         setCostPrice(value);
