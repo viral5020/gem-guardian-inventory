@@ -19,10 +19,11 @@ import { useReactToPrint } from "react-to-print";
 
 interface AddDiamondFormProps {
   onCancel?: () => void;
+  onSuccess?: (diamond: Diamond) => void;
   initialData?: Diamond;
 }
 
-const AddDiamondForm = ({ onCancel, initialData }: AddDiamondFormProps) => {
+const AddDiamondForm = ({ onCancel, onSuccess, initialData }: AddDiamondFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sku, setSku] = useState(initialData?.sku || "");
   const [shape, setShape] = useState(initialData?.shape || "");
@@ -31,6 +32,11 @@ const AddDiamondForm = ({ onCancel, initialData }: AddDiamondFormProps) => {
   const [clarity, setClarity] = useState(initialData?.clarity || "");
   const [color, setColor] = useState(initialData?.color || "");
   const [barcodeData, setBarcodeData] = useState("");
+  const [certNumber, setCertNumber] = useState(initialData?.certNumber || "");
+  const [certLab, setCertLab] = useState(initialData?.certLab || "");
+  const [costPrice, setCostPrice] = useState(initialData?.costPrice?.toString() || "");
+  const [retailPrice, setRetailPrice] = useState(initialData?.retailPrice?.toString() || "");
+  const [notes, setNotes] = useState(initialData?.notes || "");
   const printRef = useRef<HTMLDivElement>(null);
 
   // Generate barcode based on diamond details
@@ -60,6 +66,24 @@ const AddDiamondForm = ({ onCancel, initialData }: AddDiamondFormProps) => {
       generateBarcode();
     }
     
+    // Create updated diamond object
+    const updatedDiamond: Diamond = {
+      ...initialData,
+      id: initialData?.id || '',
+      sku,
+      shape,
+      carat: parseFloat(carat),
+      cut,
+      clarity,
+      color,
+      certNumber,
+      certLab,
+      costPrice: parseFloat(costPrice),
+      retailPrice: parseFloat(retailPrice),
+      notes,
+      lastModified: new Date().toISOString().split('T')[0],
+    };
+    
     // Simulate API call
     setTimeout(() => {
       setIsSubmitting(false);
@@ -67,7 +91,14 @@ const AddDiamondForm = ({ onCancel, initialData }: AddDiamondFormProps) => {
         title: initialData ? "Diamond Updated" : "Diamond Added",
         description: initialData ? "The diamond has been successfully updated." : "The diamond has been successfully added to inventory.",
       });
-      if (onCancel) onCancel(); // Return to previous view after successful submission
+      
+      if (onSuccess) {
+        onSuccess(updatedDiamond);
+      }
+      
+      if (onCancel && !onSuccess) {
+        onCancel(); // Return to previous view if no success handler
+      }
     }, 1000);
   };
   
@@ -95,6 +126,21 @@ const AddDiamondForm = ({ onCancel, initialData }: AddDiamondFormProps) => {
         break;
       case "color":
         setColor(value);
+        break;
+      case "certNumber":
+        setCertNumber(value);
+        break;
+      case "certLab":
+        setCertLab(value);
+        break;
+      case "costPrice":
+        setCostPrice(value);
+        break;
+      case "retailPrice":
+        setRetailPrice(value);
+        break;
+      case "notes":
+        setNotes(value);
         break;
       default:
         break;
@@ -287,20 +333,25 @@ const AddDiamondForm = ({ onCancel, initialData }: AddDiamondFormProps) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="certNumber">Certificate Number</Label>
-                <Input id="certNumber" placeholder="e.g. 2141957190" />
+                <Input 
+                  id="certNumber" 
+                  placeholder="e.g. 2141957190" 
+                  value={certNumber}
+                  onChange={(e) => handleFieldChange("certNumber", e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="certLab">Certification Lab</Label>
-                <Select>
+                <Select value={certLab} onValueChange={(value) => handleFieldChange("certLab", value)}>
                   <SelectTrigger id="certLab">
                     <SelectValue placeholder="Select lab" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="gia">GIA</SelectItem>
-                    <SelectItem value="igi">IGI</SelectItem>
-                    <SelectItem value="ags">AGS</SelectItem>
-                    <SelectItem value="hrd">HRD</SelectItem>
-                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="GIA">GIA</SelectItem>
+                    <SelectItem value="IGI">IGI</SelectItem>
+                    <SelectItem value="AGS">AGS</SelectItem>
+                    <SelectItem value="HRD">HRD</SelectItem>
+                    <SelectItem value="None">None</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -317,7 +368,14 @@ const AddDiamondForm = ({ onCancel, initialData }: AddDiamondFormProps) => {
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
                     $
                   </span>
-                  <Input id="costPrice" type="number" className="pl-7" placeholder="0" />
+                  <Input 
+                    id="costPrice" 
+                    type="number" 
+                    className="pl-7" 
+                    placeholder="0" 
+                    value={costPrice}
+                    onChange={(e) => handleFieldChange("costPrice", e.target.value)}
+                  />
                 </div>
               </div>
               <div className="space-y-2">
@@ -326,7 +384,14 @@ const AddDiamondForm = ({ onCancel, initialData }: AddDiamondFormProps) => {
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
                     $
                   </span>
-                  <Input id="retailPrice" type="number" className="pl-7" placeholder="0" />
+                  <Input 
+                    id="retailPrice" 
+                    type="number" 
+                    className="pl-7" 
+                    placeholder="0" 
+                    value={retailPrice}
+                    onChange={(e) => handleFieldChange("retailPrice", e.target.value)}
+                  />
                 </div>
               </div>
             </div>
@@ -337,7 +402,12 @@ const AddDiamondForm = ({ onCancel, initialData }: AddDiamondFormProps) => {
             <h3 className="text-lg font-medium">Additional Information</h3>
             <div className="space-y-2">
               <Label htmlFor="notes">Notes</Label>
-              <Textarea id="notes" placeholder="Add any additional information here..." />
+              <Textarea 
+                id="notes" 
+                placeholder="Add any additional information here..." 
+                value={notes}
+                onChange={(e) => handleFieldChange("notes", e.target.value)}
+              />
             </div>
           </div>
         </CardContent>

@@ -32,12 +32,18 @@ interface DiamondDetailProps {
 
 const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [currentDiamond, setCurrentDiamond] = useState<DiamondType>(diamond);
   
   const handleEdit = () => {
     setIsEditing(true);
   };
 
   const handleEditCancel = () => {
+    setIsEditing(false);
+  };
+
+  const handleEditSuccess = (updatedDiamond: DiamondType) => {
+    setCurrentDiamond({...updatedDiamond, id: diamond.id}); // Preserve the ID
     setIsEditing(false);
   };
   
@@ -52,8 +58,9 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
             </Button>
           </div>
           <AddDiamondForm 
-            initialData={diamond} 
+            initialData={currentDiamond} 
             onCancel={handleEditCancel}
+            onSuccess={handleEditSuccess}
           />
         </div>
       ) : (
@@ -82,8 +89,8 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
               </CardContent>
               <CardFooter>
                 <div className="w-full text-center">
-                  <Badge variant="outline" className={getStatusClass(diamond.status)}>
-                    {diamond.status}
+                  <Badge variant="outline" className={getStatusClass(currentDiamond.status)}>
+                    {currentDiamond.status}
                   </Badge>
                 </div>
               </CardFooter>
@@ -94,17 +101,17 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-2xl font-bold">{diamond.sku}</CardTitle>
+                    <CardTitle className="text-2xl font-bold">{currentDiamond.sku}</CardTitle>
                     <CardDescription>
-                      {diamond.shape} {diamond.carat} ct {diamond.color} {diamond.clarity}
+                      {currentDiamond.shape} {currentDiamond.carat} ct {currentDiamond.color} {currentDiamond.clarity}
                     </CardDescription>
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold text-primary">
-                      {formatCurrency(diamond.retailPrice)}
+                      {formatCurrency(currentDiamond.retailPrice)}
                     </div>
                     <CardDescription>
-                      Cost: {formatCurrency(diamond.costPrice)}
+                      Cost: {formatCurrency(currentDiamond.costPrice)}
                     </CardDescription>
                   </div>
                 </div>
@@ -116,29 +123,29 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">Carat</p>
-                      <p className="text-lg font-medium">{diamond.carat}</p>
+                      <p className="text-lg font-medium">{currentDiamond.carat}</p>
                     </div>
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">Color</p>
                       <div className="flex items-center">
-                        <Badge variant="outline" className={getColorClass(diamond.color)}>
-                          {diamond.color}
+                        <Badge variant="outline" className={getColorClass(currentDiamond.color)}>
+                          {currentDiamond.color}
                         </Badge>
                       </div>
                     </div>
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">Clarity</p>
                       <div className="flex items-center">
-                        <Badge variant="outline" className={getClarityClass(diamond.clarity)}>
-                          {diamond.clarity}
+                        <Badge variant="outline" className={getClarityClass(currentDiamond.clarity)}>
+                          {currentDiamond.clarity}
                         </Badge>
                       </div>
                     </div>
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">Cut</p>
                       <div className="flex items-center">
-                        <Badge variant="outline" className={getCutClass(diamond.cut)}>
-                          {diamond.cut}
+                        <Badge variant="outline" className={getCutClass(currentDiamond.cut)}>
+                          {currentDiamond.cut}
                         </Badge>
                       </div>
                     </div>
@@ -153,15 +160,15 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">Dimensions</p>
-                      <p className="text-lg font-medium">{diamond.measurements} mm</p>
+                      <p className="text-lg font-medium">{currentDiamond.measurements} mm</p>
                     </div>
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">Depth %</p>
-                      <p className="text-lg font-medium">{diamond.depthPercentage}%</p>
+                      <p className="text-lg font-medium">{currentDiamond.depthPercentage}%</p>
                     </div>
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">Table %</p>
-                      <p className="text-lg font-medium">{diamond.tablePercentage}%</p>
+                      <p className="text-lg font-medium">{currentDiamond.tablePercentage}%</p>
                     </div>
                   </div>
                 </div>
@@ -174,11 +181,11 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="text-sm text-muted-foreground">Cert Number</p>
-                      <p className="text-lg font-medium">{diamond.certNumber}</p>
+                      <p className="text-lg font-medium">{currentDiamond.certNumber}</p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Lab</p>
-                      <p className="text-lg font-medium">{diamond.certLab}</p>
+                      <p className="text-lg font-medium">{currentDiamond.certLab}</p>
                     </div>
                     <Button variant="outline" size="sm">
                       <Award className="mr-2 h-4 w-4" />
@@ -188,13 +195,13 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
                 </div>
 
                 {/* Laser Inscription */}
-                {diamond.laserInscription && (
+                {currentDiamond.laserInscription && (
                   <>
                     <Separator />
                     <div>
                       <h3 className="text-lg font-semibold mb-4">Laser Inscription</h3>
                       <p className="text-lg font-medium font-mono tracking-widest">
-                        {diamond.laserInscription}
+                        {currentDiamond.laserInscription}
                       </p>
                     </div>
                   </>
@@ -213,17 +220,17 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <p className="text-sm text-muted-foreground">Current Location</p>
-                      <p>{diamond.location}</p>
+                      <p>{currentDiamond.location}</p>
                     </div>
                     <div className="flex justify-between">
                       <p className="text-sm text-muted-foreground">Status</p>
-                      <Badge variant="outline" className={getStatusClass(diamond.status)}>
-                        {diamond.status}
+                      <Badge variant="outline" className={getStatusClass(currentDiamond.status)}>
+                        {currentDiamond.status}
                       </Badge>
                     </div>
                     <div className="flex justify-between">
                       <p className="text-sm text-muted-foreground">Last Updated</p>
-                      <p>{formatDate(diamond.lastModified)}</p>
+                      <p>{formatDate(currentDiamond.lastModified)}</p>
                     </div>
                   </div>
                 </div>
@@ -233,22 +240,22 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <p className="text-sm text-muted-foreground">Type</p>
-                      <p>{diamond.procurementType}</p>
+                      <p>{currentDiamond.procurementType}</p>
                     </div>
                     <div className="flex justify-between">
                       <p className="text-sm text-muted-foreground">Date</p>
-                      <p>{formatDate(diamond.procurementDate)}</p>
+                      <p>{formatDate(currentDiamond.procurementDate)}</p>
                     </div>
                     <div className="flex justify-between">
                       <p className="text-sm text-muted-foreground">Origin</p>
-                      <p>{diamond.origin || "Unknown"}</p>
+                      <p>{currentDiamond.origin || "Unknown"}</p>
                     </div>
                   </div>
                 </div>
                 
                 <div className="space-y-4">
                   <h3 className="font-medium">Notes</h3>
-                  <p className="text-sm">{diamond.notes || "No notes available for this diamond."}</p>
+                  <p className="text-sm">{currentDiamond.notes || "No notes available for this diamond."}</p>
                 </div>
               </CardContent>
             </Card>
@@ -256,14 +263,14 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
             {/* Kimberley Process */}
             <div className="lg:col-span-1">
               <KimberleyProcessCertification 
-                hasCertification={diamond.kimberleyProcess || false}
-                origin={diamond.origin}
+                hasCertification={currentDiamond.kimberleyProcess || false}
+                origin={currentDiamond.origin}
               />
             </div>
 
             {/* Movement History */}
             <div className="lg:col-span-2">
-              <DiamondMovementHistory movements={diamond.movementHistory} />
+              <DiamondMovementHistory movements={currentDiamond.movementHistory} />
             </div>
           </div>
         </div>
