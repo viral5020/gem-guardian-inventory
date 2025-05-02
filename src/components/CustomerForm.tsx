@@ -84,7 +84,7 @@ const CustomerForm: React.FC<CustomerFormProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
@@ -93,7 +93,7 @@ const CustomerForm: React.FC<CustomerFormProps> = ({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 py-4">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -189,7 +189,7 @@ const CustomerForm: React.FC<CustomerFormProps> = ({
                   <FormControl>
                     <Textarea 
                       placeholder="Full address (optional)" 
-                      className="resize-none" 
+                      className="resize-none min-h-[80px]" 
                       {...field} 
                     />
                   </FormControl>
@@ -206,12 +206,18 @@ const CustomerForm: React.FC<CustomerFormProps> = ({
                   <FormItem>
                     <FormLabel>Credit Limit</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
-                        min="0"
-                        placeholder="0.00" 
-                        {...field}
-                      />
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
+                          $
+                        </span>
+                        <Input 
+                          type="number" 
+                          min="0"
+                          placeholder="0.00" 
+                          className="pl-7"
+                          {...field}
+                        />
+                      </div>
                     </FormControl>
                     <FormDescription>
                       Maximum credit allowed for this customer
@@ -231,7 +237,7 @@ const CustomerForm: React.FC<CustomerFormProps> = ({
                   <FormControl>
                     <Textarea 
                       placeholder="Additional notes about this customer" 
-                      className="resize-none"
+                      className="resize-none min-h-[100px]"
                       {...field}
                     />
                   </FormControl>
@@ -241,7 +247,10 @@ const CustomerForm: React.FC<CustomerFormProps> = ({
             />
             
             <DialogFooter>
-              <Button type="submit" className="w-full md:w-auto">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">
                 {initialData ? "Update Customer" : "Add Customer"}
               </Button>
             </DialogFooter>
