@@ -4,6 +4,7 @@ import DashboardCard from "./DashboardCard";
 import { totalDiamonds, availableDiamonds, onMemoDiamonds, totalInventoryValue } from "@/data/mockDiamonds";
 import DiamondList from "./DiamondList";
 import { formatCurrency } from "@/lib/utils";
+import FinanceOverview from "./FinanceOverview";
 
 interface DashboardProps {
   onSelectDiamond?: (diamondId: string) => void;
@@ -48,6 +49,11 @@ const Dashboard = ({ onSelectDiamond }: DashboardProps) => {
           limit={5} 
           onSelectDiamond={onSelectDiamond}
         />
+      </div>
+      
+      <div className="py-4">
+        <h2 className="text-xl font-bold mb-4">Financial Summary</h2>
+        <FinanceOverview />
       </div>
     </div>
   );
