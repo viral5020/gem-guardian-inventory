@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   Card, 
@@ -118,8 +117,14 @@ const FinanceOverview: React.FC = () => {
 
   const onSubmit = (data: TransactionFormData) => {
     if (currentTransaction) {
-      // Update
-      const updated = updateTransaction(currentTransaction.id, data);
+      // Update - ensure all required fields are present
+      const updated = updateTransaction(currentTransaction.id, {
+        date: data.date,
+        description: data.description,
+        amount: data.amount,
+        type: data.type,
+        account: data.account
+      });
       if (updated) {
         setTransactions([...recentTransactions]);
         toast({
@@ -128,8 +133,14 @@ const FinanceOverview: React.FC = () => {
         });
       }
     } else {
-      // Add
-      const added = addTransaction(data);
+      // Add - ensure all required fields are present
+      const added = addTransaction({
+        date: data.date,
+        description: data.description,
+        amount: data.amount,
+        type: data.type,
+        account: data.account
+      });
       setTransactions([...recentTransactions]);
       toast({
         title: "Success",
