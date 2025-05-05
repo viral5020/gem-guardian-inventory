@@ -8,10 +8,10 @@ export interface Transaction {
   account: 'cash' | 'bank';
 }
 
-export const cashBalance = 25750;
-export const bankBalance = 432800;
+export let cashBalance = 25750;
+export let bankBalance = 432800;
 
-export const recentTransactions: Transaction[] = [
+export let recentTransactions: Transaction[] = [
   {
     id: "trans-001",
     date: "2025-05-03",
@@ -69,3 +69,84 @@ export const recentTransactions: Transaction[] = [
     account: "bank"
   }
 ];
+
+export const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
+  const newTransaction = {
+    ...transaction,
+    id: `trans-${Math.floor(Math.random() * 100000).toString().padStart(6, '0')}`,
+  };
+  
+  // Update balances
+  if (transaction.account === 'cash') {
+    cashBalance = transaction.type === 'deposit' 
+      ? cashBalance + transaction.amount 
+      : cashBalance - transaction.amount;
+  } else {
+    bankBalance = transaction.type === 'deposit' 
+      ? bankBalance + transaction.amount 
+      : bankBalance - transaction.amount;
+  }
+  
+  // Add to transactions
+  recentTransactions = [newTransaction, ...recentTransactions];
+  return newTransaction;
+};
+
+export const updateTransaction = (
+  id: string, 
+  updatedTransaction: Omit<Transaction, 'id'>
+) => {
+  // Find the existing transaction
+  const existingTransaction = recentTransactions.find(t => t.id === id);
+  if (!existingTransaction) return null;
+  
+  // Reverse the effect of the old transaction on balance
+  if (existingTransaction.account === 'cash') {
+    cashBalance = existingTransaction.type === 'deposit' 
+      ? cashBalance - existingTransaction.amount 
+      : cashBalance + existingTransaction.amount;
+  } else {
+    bankBalance = existingTransaction.type === 'deposit' 
+      ? bankBalance - existingTransaction.amount 
+      : bankBalance + existingTransaction.amount;
+  }
+  
+  // Apply the effect of the new transaction
+  if (updatedTransaction.account === 'cash') {
+    cashBalance = updatedTransaction.type === 'deposit' 
+      ? cashBalance + updatedTransaction.amount 
+      : cashBalance - updatedTransaction.amount;
+  } else {
+    bankBalance = updatedTransaction.type === 'deposit' 
+      ? bankBalance + updatedTransaction.amount 
+      : bankBalance - updatedTransaction.amount;
+  }
+  
+  // Update the transaction list
+  recentTransactions = recentTransactions.map(t => 
+    t.id === id ? { ...updatedTransaction, id } : t
+  );
+  
+  return { ...updatedTransaction, id };
+};
+
+export const deleteTransaction = (id: string) => {
+  // Find the transaction
+  const transaction = recentTransactions.find(t => t.id === id);
+  if (!transaction) return false;
+  
+  // Reverse its effect on the balance
+  if (transaction.account === 'cash') {
+    cashBalance = transaction.type === 'deposit' 
+      ? cashBalance - transaction.amount 
+      : cashBalance + transaction.amount;
+  } else {
+    bankBalance = transaction.type === 'deposit' 
+      ? bankBalance - transaction.amount 
+      : bankBalance + transaction.amount;
+  }
+  
+  // Remove from the list
+  recentTransactions = recentTransactions.filter(t => t.id !== id);
+  return true;
+};
