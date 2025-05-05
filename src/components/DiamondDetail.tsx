@@ -18,7 +18,7 @@ import {
   getCutClass,
   getStatusClass 
 } from "@/lib/utils";
-import { ArrowLeft, Edit, Package, Award, DollarSign, Plus, Trash, Calendar, ArrowRight } from "lucide-react";
+import { ArrowLeft, Edit, Package, Award, DollarSign, Plus, Trash, Calendar, ArrowRight, Barcode } from "lucide-react";
 import DiamondMovementHistory from "./DiamondMovementHistory";
 import KimberleyProcessCertification from "./KimberleyProcessCertification";
 import { useState } from "react";
@@ -291,6 +291,12 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
     setSelectedMovement(null);
   };
   
+  // Function to generate barcode value
+  const getBarcodeValue = (diamond: DiamondType) => {
+    // Creating a unique barcode based on diamond properties
+    return `${diamond.sku}-${diamond.certNumber}`.toUpperCase();
+  };
+  
   return (
     <>
       {isEditing ? (
@@ -326,9 +332,31 @@ const DiamondDetail = ({ diamond, onBack }: DiamondDetailProps) => {
               <CardHeader className="pb-2">
                 <CardTitle>Diamond Image</CardTitle>
               </CardHeader>
-              <CardContent className="flex justify-center">
+              <CardContent className="flex flex-col items-center space-y-4">
                 <div className="w-full aspect-square bg-slate-100 rounded-md flex items-center justify-center border">
                   <Package className="h-24 w-24 text-slate-300" />
+                </div>
+                
+                {/* Barcode Section */}
+                <div className="w-full flex flex-col items-center space-y-2 mt-4 border-t pt-4">
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Barcode className="h-4 w-4 mr-1" />
+                    <span>Identification Barcode</span>
+                  </div>
+                  <div className="bg-slate-50 w-full p-3 rounded-md flex flex-col items-center space-y-2">
+                    {/* Barcode visualization (this is a simple representation) */}
+                    <div className="h-12 w-full bg-contain bg-no-repeat bg-center" 
+                        style={{backgroundImage: `url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCAyMDAgNTAiPjxnIGZpbGw9IiMwMDAiPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIzIiBoZWlnaHQ9IjUwIi8+PHJlY3QgeD0iNSIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iNTAiLz48cmVjdCB4PSI5IiB5PSIwIiB3aWR0aD0iMyIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjE0IiB5PSIwIiB3aWR0aD0iMiIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjIwIiB5PSIwIiB3aWR0aD0iMiIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjI1IiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjI5IiB5PSIwIiB3aWR0aD0iMyIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjM1IiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjQxIiB5PSIwIiB3aWR0aD0iMiIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjQ2IiB5PSIwIiB3aWR0aD0iMiIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjUwIiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjU0IiB5PSIwIiB3aWR0aD0iMyIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjU5IiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjYzIiB5PSIwIiB3aWR0aD0iMyIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjY4IiB5PSIwIiB3aWR0aD0iMiIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9Ijc2IiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjcyIiB5PSIwIiB3aWR0aD0iMiIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9Ijc2IiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjgwIiB5PSIwIiB3aWR0aD0iMiIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9Ijg0IiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9Ijg4IiB5PSIwIiB3aWR0aD0iMyIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjkzIiB5PSIwIiB3aWR0aD0iMiIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9Ijk3IiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjEwMSIgeT0iMCIgd2lkdGg9IjMiIGhlaWdodD0iNTAiLz48cmVjdCB4PSIxMDYiIHk9IjAiIHdpZHRoPSIyIiBoZWlnaHQ9IjUwIi8+PHJlY3QgeD0iMTExIiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjExNSIgeT0iMCIgd2lkdGg9IjMiIGhlaWdodD0iNTAiLz48cmVjdCB4PSIxMjEiIHk9IjAiIHdpZHRoPSIyIiBoZWlnaHQ9IjUwIi8+PHJlY3QgeD0iMTI1IiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjEzMCIgeT0iMCIgd2lkdGg9IjMiIGhlaWdodD0iNTAiLz48cmVjdCB4PSIxMzUiIHk9IjAiIHdpZHRoPSIyIiBoZWlnaHQ9IjUwIi8+PHJlY3QgeD0iMTM5IiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjE0NCIgeT0iMCIgd2lkdGg9IjMiIGhlaWdodD0iNTAiLz48cmVjdCB4PSIxNDkiIHk9IjAiIHdpZHRoPSIyIiBoZWlnaHQ9IjUwIi8+PHJlY3QgeD0iMTUzIiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjE1OCIgeT0iMCIgd2lkdGg9IjMiIGhlaWdodD0iNTAiLz48cmVjdCB4PSIxNjQiIHk9IjAiIHdpZHRoPSIyIiBoZWlnaHQ9IjUwIi8+PHJlY3QgeD0iMTY4IiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjE3MiIgeT0iMCIgd2lkdGg9IjMiIGhlaWdodD0iNTAiLz48cmVjdCB4PSIxNzgiIHk9IjAiIHdpZHRoPSIyIiBoZWlnaHQ9IjUwIi8+PHJlY3QgeD0iMTgyIiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSI1MCIvPjxyZWN0IHg9IjE4NyIgeT0iMCIgd2lkdGg9IjMiIGhlaWdodD0iNTAiLz48cmVjdCB4PSIxOTMiIHk9IjAiIHdpZHRoPSIxIiBoZWlnaHQ9IjUwIi8+PHJlY3QgeD0iMTk3IiB5PSIwIiB3aWR0aD0iMyIgaGVpZ2h0PSI1MCIvPjwvZz48L3N2Zz4=')`}} 
+                    />
+                    {/* Barcode Text */}
+                    <div className="text-sm font-mono tracking-wider">
+                      {getBarcodeValue(currentDiamond)}
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" className="w-full mt-2">
+                    <Barcode className="mr-2 h-4 w-4" />
+                    Print Barcode
+                  </Button>
                 </div>
               </CardContent>
               <CardFooter>
