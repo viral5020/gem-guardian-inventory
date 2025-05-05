@@ -10,10 +10,12 @@ import { mockDiamonds } from "@/data/mockDiamonds";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Diamond } from "@/types/diamond";
 
 const Index = () => {
   const [selectedDiamond, setSelectedDiamond] = useState<string | null>(null);
   const [isAddingDiamond, setIsAddingDiamond] = useState(false);
+  const [refresh, setRefresh] = useState(0); // Force refresh when diamonds change
   
   const diamond = selectedDiamond ? mockDiamonds.find(d => d.id === selectedDiamond) : null;
   
@@ -23,6 +25,12 @@ const Index = () => {
 
   const handleCancelAddDiamond = () => {
     setIsAddingDiamond(false);
+  };
+  
+  const handleDiamondAdded = (newDiamond: Diamond) => {
+    setIsAddingDiamond(false);
+    setSelectedDiamond(newDiamond.id);
+    setRefresh(prev => prev + 1); // Force refresh to show new diamond
   };
   
   return (
@@ -39,7 +47,10 @@ const Index = () => {
         </div>
         
         {isAddingDiamond ? (
-          <AddDiamondForm onCancel={handleCancelAddDiamond} />
+          <AddDiamondForm 
+            onCancel={handleCancelAddDiamond} 
+            onSuccess={handleDiamondAdded}
+          />
         ) : diamond ? (
           <DiamondDetail 
             diamond={diamond} 
@@ -66,6 +77,7 @@ const Index = () => {
                   </Button>
                 </div>
                 <DiamondList 
+                  key={`diamond-list-${refresh}`} // Force re-render when diamonds change
                   onSelectDiamond={setSelectedDiamond}
                   onAddDiamond={handleAddDiamond}
                 />

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,8 +13,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { Diamond, DiamondShape, CutGrade, ClarityGrade, ColorGrade, CertificationLab } from "@/types/diamond";
-import { Barcode, Printer } from "lucide-react";
+import { Barcode, Printer, Upload, X, Image as ImageIcon } from "lucide-react";
 import { useReactToPrint } from "react-to-print";
+import { mockDiamonds } from "@/data/mockDiamonds";
 
 interface AddDiamondFormProps {
   onCancel?: () => void;
@@ -37,6 +38,10 @@ const AddDiamondForm = ({ onCancel, onSuccess, initialData }: AddDiamondFormProp
   const [retailPrice, setRetailPrice] = useState(initialData?.retailPrice?.toString() || "");
   const [notes, setNotes] = useState(initialData?.notes || "");
   const printRef = useRef<HTMLDivElement>(null);
+  
+  // Image upload state
+  const [images, setImages] = useState<string[]>(initialData?.images || []);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Generate barcode based on diamond details
   const generateBarcode = () => {
@@ -55,6 +60,41 @@ const AddDiamondForm = ({ onCancel, onSuccess, initialData }: AddDiamondFormProp
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
   });
+
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setIsUploading(true);
+      
+      // Process each file
+      const newImages: string[] = [...images];
+      const filesArray = Array.from(e.target.files);
+      
+      filesArray.forEach(file => {
+        // Create a file reader
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          // Add the image URL to our images array
+          if (typeof reader.result === 'string') {
+            newImages.push(reader.result);
+            setImages([...newImages]);
+          }
+          setIsUploading(false);
+        };
+        
+        // Read the file as a data URL
+        reader.readAsDataURL(file);
+      });
+      
+      // Reset the input value to allow selecting the same file again
+      e.target.value = '';
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const newImages = [...images];
+    newImages.splice(index, 1);
+    setImages(newImages);
+  };
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,10 +105,10 @@ const AddDiamondForm = ({ onCancel, onSuccess, initialData }: AddDiamondFormProp
       generateBarcode();
     }
     
-    // Create updated diamond object
+    // Create new/updated diamond object
     const updatedDiamond: Diamond = {
       ...initialData,
-      id: initialData?.id || '',
+      id: initialData?.id || crypto.randomUUID(), // Generate a new UUID if this is a new diamond
       sku,
       shape,
       carat: parseFloat(carat),
@@ -81,6 +121,7 @@ const AddDiamondForm = ({ onCancel, onSuccess, initialData }: AddDiamondFormProp
       retailPrice: parseFloat(retailPrice),
       notes,
       lastModified: new Date().toISOString().split('T')[0],
+      images: images.length > 0 ? images : undefined,
       // Keep other required fields with default values if not present in initialData
       fluorescence: initialData?.fluorescence || 'None',
       polish: initialData?.polish || 'Excellent',
@@ -98,9 +139,23 @@ const AddDiamondForm = ({ onCancel, onSuccess, initialData }: AddDiamondFormProp
     // Simulate API call
     setTimeout(() => {
       setIsSubmitting(false);
+      
+      // Add to mock data if this is a new diamond
+      if (!initialData) {
+        mockDiamonds.unshift(updatedDiamond);
+      } else {
+        // Update existing diamond in mockDiamonds array
+        const index = mockDiamonds.findIndex(d => d.id === initialData.id);
+        if (index !== -1) {
+          mockDiamonds[index] = updatedDiamond;
+        }
+      }
+      
       toast({
         title: initialData ? "Diamond Updated" : "Diamond Added",
-        description: initialData ? "The diamond has been successfully updated." : "The diamond has been successfully added to inventory.",
+        description: initialData 
+          ? "The diamond has been successfully updated." 
+          : "The diamond has been successfully added to inventory.",
       });
       
       if (onSuccess) {
@@ -282,6 +337,75 @@ const AddDiamondForm = ({ onCancel, onSuccess, initialData }: AddDiamondFormProp
                     <SelectItem value="Z+">Z+</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+          </div>
+          
+          {/* Diamond Images */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Diamond Images</h3>
+            <div className="space-y-4">
+              {/* Current Images */}
+              {images.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {images.map((image, index) => (
+                    <div key={index} className="relative group">
+                      <img 
+                        src={image} 
+                        alt={`Diamond ${sku} view ${index + 1}`} 
+                        className="w-full h-32 object-cover rounded-md border"
+                      />
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="destructive"
+                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeImage(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* Upload Button */}
+              <div>
+                <Label htmlFor="image-upload">Upload Images</Label>
+                <div className="mt-2">
+                  <label
+                    htmlFor="image-upload"
+                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      {isUploading ? (
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                          <p className="text-sm text-gray-500">Uploading...</p>
+                        </div>
+                      ) : (
+                        <>
+                          <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                          <p className="mb-1 text-sm text-gray-500">
+                            <span className="font-semibold">Click to upload</span> or drag and drop
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            PNG, JPG, or WEBP (max. 5MB)
+                          </p>
+                        </>
+                      )}
+                    </div>
+                    <Input
+                      id="image-upload"
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageUpload}
+                      disabled={isUploading}
+                    />
+                  </label>
+                </div>
               </div>
             </div>
           </div>
