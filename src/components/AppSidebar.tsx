@@ -19,11 +19,13 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger
+  SidebarTrigger,
+  useSidebar
 } from "@/components/ui/sidebar";
 
 const AppSidebar = () => {
   const location = useLocation();
+  const { state } = useSidebar();
   
   // Navigation items with icons and routes
   const navigationItems = [
@@ -57,10 +59,10 @@ const AppSidebar = () => {
   return (
     <Sidebar>
       <SidebarHeader className="flex items-center justify-between px-4 pt-4">
-        <div className="flex items-center gap-2">
+        <div className={`flex items-center gap-2 ${state === "collapsed" ? "sr-only" : ""}`}>
           <div className="font-bold text-lg">Diamond Manager</div>
         </div>
-        <SidebarTrigger />
+        <SidebarTrigger className={state === "collapsed" ? "ml-auto" : ""} />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -76,7 +78,7 @@ const AppSidebar = () => {
                   >
                     <Link to={item.path}>
                       <item.icon />
-                      <span>{item.title}</span>
+                      <span>{state === "collapsed" ? "" : item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -86,7 +88,7 @@ const AppSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="p-4">
-        <div className="text-xs text-muted-foreground">
+        <div className={`text-xs text-muted-foreground ${state === "collapsed" ? "sr-only" : ""}`}>
           Diamond Inventory System v1.0
         </div>
       </SidebarFooter>
