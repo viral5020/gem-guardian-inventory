@@ -18,7 +18,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
   useSidebar
 } from "@/components/ui/sidebar";
 
@@ -57,8 +56,8 @@ const AppSidebar = () => {
 
   return (
     <Sidebar>
-      <SidebarHeader className="flex items-center justify-between px-4 pt-4">
-        <div className={`flex items-center gap-2 ${state === "collapsed" ? "sr-only" : ""}`}>
+      <SidebarHeader className="flex items-center justify-center p-4">
+        <div className="flex items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -76,11 +75,10 @@ const AppSidebar = () => {
           </svg>
           <div className="font-bold text-lg">Gem Guardian</div>
         </div>
-        <SidebarTrigger className={state === "collapsed" ? "ml-auto" : ""} />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Menu</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-gem-gold font-medium">Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navigationItems.map((item) => (
@@ -89,10 +87,11 @@ const AppSidebar = () => {
                     asChild
                     isActive={location.pathname === item.path}
                     tooltip={item.title}
+                    className="hover:bg-gradient-to-r hover:from-purple-50 hover:to-transparent transition-all duration-300"
                   >
                     <Link to={item.path}>
-                      <item.icon />
-                      <span>{state === "collapsed" ? "" : item.title}</span>
+                      <item.icon className={location.pathname === item.path ? "text-gem-gold" : ""} />
+                      <span className={location.pathname === item.path ? "font-medium text-gem-gold" : ""}>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -102,7 +101,7 @@ const AppSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="p-4">
-        <div className={`text-xs text-muted-foreground ${state === "collapsed" ? "sr-only" : ""}`}>
+        <div className="text-xs text-muted-foreground text-center">
           Gem Guardian v1.0
         </div>
       </SidebarFooter>
