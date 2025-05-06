@@ -7,6 +7,24 @@ const Navbar = () => {
   return (
     <div className="border-b bg-white">
       <div className="flex h-16 items-center px-4 md:px-6">
+        <div className="flex items-center gap-2 font-bold text-xl text-gem-blue">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-6 w-6 text-gem-gold"
+          >
+            <path d="M16 2s1.5 2 2 3.5c.34 1 1.74 1.5 3 1.5h1L17.5 15" />
+            <path d="M8.53 2c-.77 2.2-1.64 3.2-3.53 4" />
+            <path d="M4.95 6c-1.09 1.33-1.27 1.67-1.85 3C2.9 10 2.5 17 2.5 19c0 1 .33 1 1 1a6 6 0 0 0 3.5-1.5 3.6 3.6 0 0 1 5 0 6 6 0 0 0 3.5 1.5c.67 0 1 0 1-1 0-2-.4-9-1.6-10-.58-1.33-.76-1.67-1.85-3" />
+            <path d="M7 15a3 3 0 1 0 3-3 3 3 0 0 0-3 3z" />
+          </svg>
+          <span>Gem Guardian</span>
+        </div>
         <div className="ml-auto flex items-center gap-4">
           <form className="hidden md:block">
             <div className="relative">
