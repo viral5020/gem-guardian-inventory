@@ -1,12 +1,11 @@
-
 import { useState } from "react";
-import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { BarChartIcon, PieChart as PieChartIcon, TrendingUp, DollarSign } from "lucide-react";
+import Navbar from "@/components/Navbar";
 
 // Mock data for analytics
 const inventoryByShape = [

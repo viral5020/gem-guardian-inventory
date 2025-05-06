@@ -1,6 +1,4 @@
-
 import { useState } from "react";
-import Navbar from "@/components/Navbar";
 import CustomerManagement from "@/components/CustomerManagement";
 import DiamondMemoManagement from "@/components/DiamondMemoManagement";
 import CustomerForm from "@/components/CustomerForm";
@@ -297,7 +295,6 @@ const Customers = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
       <main className="flex-1 container mx-auto py-6 px-4 md:px-6">
         <div className="space-y-6">
           <h1 className="text-3xl font-bold">Customer Relationship Management</h1>
