@@ -13,6 +13,7 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import React from "react";
 import AppSidebar from "./components/AppSidebar";
+import Navbar from "./components/Navbar";
 import { SidebarInset, SidebarProvider } from "./components/ui/sidebar";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <div className="flex min-h-screen w-full">
               <AppSidebar />
               <SidebarInset className="overflow-auto">
+                <Navbar />
                 <Routes>
                   <Route path="/login" element={<Login />} />
                   <Route path="/" element={<Index />} />
