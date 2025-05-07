@@ -44,25 +44,23 @@ const Dashboard = ({ onSelectDiamond }: DashboardProps) => {
         />
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="py-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">Recently Added Diamonds</h2>
-            <Button variant="outline" asChild>
-              <Link to="/lots">Manage Diamond Lots</Link>
-            </Button>
-          </div>
-          <DiamondList 
-            showFilters={false} 
-            limit={5} 
-            onSelectDiamond={onSelectDiamond}
-          />
+      <div className="py-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold">Recently Added Diamonds</h2>
+          <Button variant="outline" asChild>
+            <Link to="/lots">Manage Diamond Lots</Link>
+          </Button>
         </div>
-        
-        <div className="py-4">
-          <h2 className="text-xl font-bold mb-4">Financial Summary</h2>
-          <FinanceOverview />
-        </div>
+        <DiamondList 
+          showFilters={false} 
+          limit={5} 
+          onSelectDiamond={onSelectDiamond}
+        />
+      </div>
+      
+      <div className="py-4">
+        <h2 className="text-xl font-bold mb-4">Financial Summary</h2>
+        <FinanceOverview />
       </div>
     </div>
   );
