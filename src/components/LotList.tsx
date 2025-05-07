@@ -15,6 +15,12 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 import { AlertTriangle, Search, Download, Package, User, FileSearch } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface LotListProps {
   onSelectLot?: (lotId: string) => void;
@@ -141,7 +147,16 @@ const LotList = ({ onSelectLot, onAddLot, showFilters = true, limit }: LotListPr
                         <Package className="h-4 w-4 text-primary" />
                         {lot.lotId}
                         {hasDiscrepancy && (
-                          <AlertTriangle className="h-4 w-4 text-destructive" title="Discrepancy detected" />
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <AlertTriangle className="h-4 w-4 text-destructive" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Discrepancy detected</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         )}
                       </div>
                     </TableCell>
