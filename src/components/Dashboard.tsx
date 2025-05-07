@@ -5,6 +5,8 @@ import { totalDiamonds, availableDiamonds, onMemoDiamonds, totalInventoryValue }
 import DiamondList from "./DiamondList";
 import { formatCurrency } from "@/lib/utils";
 import FinanceOverview from "./FinanceOverview";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 interface DashboardProps {
   onSelectDiamond?: (diamondId: string) => void;
@@ -43,7 +45,12 @@ const Dashboard = ({ onSelectDiamond }: DashboardProps) => {
       </div>
       
       <div className="py-4">
-        <h2 className="text-xl font-bold mb-4">Recently Added Diamonds</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold">Recently Added Diamonds</h2>
+          <Button variant="outline" asChild>
+            <Link to="/lots">Manage Diamond Lots</Link>
+          </Button>
+        </div>
         <DiamondList 
           showFilters={false} 
           limit={5} 
