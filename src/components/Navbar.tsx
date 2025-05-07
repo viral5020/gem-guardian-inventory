@@ -2,6 +2,7 @@
 import { Bell, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   return (
@@ -23,7 +24,20 @@ const Navbar = () => {
             <path d="M4.95 6c-1.09 1.33-1.27 1.67-1.85 3C2.9 10 2.5 17 2.5 19c0 1 .33 1 1 1a6 6 0 0 0 3.5-1.5 3.6 3.6 0 0 1 5 0 6 6 0 0 0 3.5 1.5c.67 0 1 0 1-1 0-2-.4-9-1.6-10-.58-1.33-.76-1.67-1.85-3" />
             <path d="M7 15a3 3 0 1 0 3-3 3 3 0 0 0-3 3z" />
           </svg>
-          <span>Gem Guardian</span>
+          <Link to="/" className="hover:opacity-80">
+            <span>Gem Guardian</span>
+          </Link>
+        </div>
+        <div className="mx-auto flex space-x-4">
+          <Button variant="ghost" asChild>
+            <Link to="/customers">Customer Management</Link>
+          </Button>
+          <Button variant="ghost" asChild>
+            <Link to="/analytics">Analytics & Reports</Link>
+          </Button>
+          <Button variant="ghost" asChild>
+            <Link to="/lots">Diamond Lots</Link>
+          </Button>
         </div>
         <div className="ml-auto flex items-center gap-4">
           <form className="hidden md:block">
