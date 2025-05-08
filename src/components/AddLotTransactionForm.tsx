@@ -4,6 +4,16 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { DiamondLot, LotTransaction } from '@/types/lot';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Form,
   FormControl,
@@ -13,18 +23,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { DiamondLot, LotTransaction } from '@/types/lot';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowUp, ArrowDown, Package } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 interface AddLotTransactionFormProps {
   lot: DiamondLot;
@@ -36,11 +36,43 @@ const formSchema = z.object({
   type: z.enum(['SALE', 'RETURN', 'TRANSFER']),
   carats: z.coerce.number()
     .positive("Carats must be positive")
-    .refine((value) => value > 0, { message: "Carat value must be greater than 0" }),
+    .min(0.01, "Minimum carat weight is 0.01"),
+  date: z.string().min(1, "Date is required"),
   handler: z.string().min(1, "Handler is required"),
   customer: z.string().optional(),
   price: z.coerce.number().optional(),
+  reason: z.string().optional(),
   notes: z.string().optional(),
+})
+.refine((data) => {
+  // Validate that sales and returns have a customer
+  if (data.type === 'SALE' || data.type === 'RETURN') {
+    return !!data.customer;
+  }
+  return true;
+}, {
+  message: "Customer is required for sales and returns",
+  path: ["customer"],
+})
+.refine((data) => {
+  // Validate that sales have a price
+  if (data.type === 'SALE') {
+    return data.price !== undefined && data.price > 0;
+  }
+  return true;
+}, {
+  message: "Price is required for sales",
+  path: ["price"],
+})
+.refine((data) => {
+  // Validate that returns have a reason
+  if (data.type === 'RETURN') {
+    return !!data.reason;
+  }
+  return true;
+}, {
+  message: "Reason is required for returns",
+  path: ["reason"],
 });
 
 const AddLotTransactionForm = ({ lot, onCancel, onSuccess }: AddLotTransactionFormProps) => {
@@ -49,34 +81,38 @@ const AddLotTransactionForm = ({ lot, onCancel, onSuccess }: AddLotTransactionFo
     defaultValues: {
       type: 'SALE',
       carats: 0,
-      handler: '',
+      date: new Date().toISOString().split('T')[0],
+      handler: lot.handler,
       customer: '',
       price: undefined,
+      reason: '',
       notes: '',
     },
   });
   
-  const watchType = form.watch('type');
+  const watchTransactionType = form.watch('type');
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    // Validate that sale carats don't exceed remaining carats
     if (values.type === 'SALE' && values.carats > lot.remainingCarats) {
       form.setError('carats', { 
-        type: 'manual', 
-        message: `Cannot sell more than the remaining ${lot.remainingCarats} carats`
+        type: 'manual',
+        message: `Cannot sell more than the remaining ${lot.remainingCarats} carats` 
       });
       return;
     }
-
+    
     const newTransaction: LotTransaction = {
       id: `t${Math.floor(Math.random() * 100000)}`,
       lotId: lot.id,
+      date: values.date,
       type: values.type,
-      date: new Date().toISOString().split('T')[0],
       carats: values.carats,
       handler: values.handler,
       customer: values.customer,
       price: values.price,
-      notes: values.notes,
+      reason: values.reason,
+      notes: values.notes
     };
     
     onSuccess(newTransaction);
@@ -85,10 +121,16 @@ const AddLotTransactionForm = ({ lot, onCancel, onSuccess }: AddLotTransactionFo
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Add Transaction for Lot {lot.lotId}</CardTitle>
-        <CardDescription>
-          Record a new sale, return, or transfer for this diamond lot
-        </CardDescription>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" onClick={onCancel} type="button">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Cancel
+          </Button>
+          <div>
+            <CardTitle className="text-2xl">Add Transaction</CardTitle>
+            <CardDescription>Record a new transaction for Lot {lot.lotId}</CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -100,38 +142,21 @@ const AddLotTransactionForm = ({ lot, onCancel, onSuccess }: AddLotTransactionFo
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Transaction Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select transaction type" />
+                          <SelectValue placeholder="Select type" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="SALE">
-                          <div className="flex items-center">
-                            <ArrowUp className="mr-2 h-4 w-4 text-destructive" />
-                            Sale
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="RETURN">
-                          <div className="flex items-center">
-                            <ArrowDown className="mr-2 h-4 w-4 text-primary" />
-                            Return
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="TRANSFER">
-                          <div className="flex items-center">
-                            <Package className="mr-2 h-4 w-4 text-muted-foreground" />
-                            Transfer
-                          </div>
-                        </SelectItem>
+                        <SelectItem value="SALE">Sale</SelectItem>
+                        <SelectItem value="RETURN">Return</SelectItem>
+                        <SelectItem value="TRANSFER">Transfer</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormDescription>
-                      {watchType === 'SALE' ? 'Record diamonds sold from this lot' :
-                       watchType === 'RETURN' ? 'Record diamonds returned to this lot' :
-                       'Record diamonds transferred to another location'}
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -146,7 +171,7 @@ const AddLotTransactionForm = ({ lot, onCancel, onSuccess }: AddLotTransactionFo
                     <FormControl>
                       <Input type="number" step="0.01" {...field} />
                     </FormControl>
-                    {watchType === 'SALE' && (
+                    {watchTransactionType === 'SALE' && (
                       <FormDescription>
                         Available: {lot.remainingCarats} carats
                       </FormDescription>
@@ -158,22 +183,36 @@ const AddLotTransactionForm = ({ lot, onCancel, onSuccess }: AddLotTransactionFo
               
               <FormField
                 control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
                 name="handler"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Handled By</FormLabel>
+                    <FormLabel>Handler</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
                     <FormDescription>
-                      Staff member handling this transaction
+                      Staff member responsible for this transaction
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               
-              {watchType === 'SALE' || watchType === 'RETURN' ? (
+              {(watchTransactionType === 'SALE' || watchTransactionType === 'RETURN') && (
                 <FormField
                   control={form.control}
                   name="customer"
@@ -187,9 +226,9 @@ const AddLotTransactionForm = ({ lot, onCancel, onSuccess }: AddLotTransactionFo
                     </FormItem>
                   )}
                 />
-              ) : null}
+              )}
               
-              {watchType === 'SALE' && (
+              {watchTransactionType === 'SALE' && (
                 <FormField
                   control={form.control}
                   name="price"
@@ -205,21 +244,35 @@ const AddLotTransactionForm = ({ lot, onCancel, onSuccess }: AddLotTransactionFo
                 />
               )}
               
-              <div className="md:col-span-2">
+              {watchTransactionType === 'RETURN' && (
                 <FormField
                   control={form.control}
-                  name="notes"
+                  name="reason"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Notes</FormLabel>
+                      <FormLabel>Return Reason</FormLabel>
                       <FormControl>
-                        <Textarea {...field} />
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
+              )}
+              
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Notes</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
             
             <div className="flex justify-end gap-3">
@@ -227,8 +280,7 @@ const AddLotTransactionForm = ({ lot, onCancel, onSuccess }: AddLotTransactionFo
                 Cancel
               </Button>
               <Button type="submit">
-                {watchType === 'SALE' ? 'Record Sale' : 
-                 watchType === 'RETURN' ? 'Record Return' : 'Record Transfer'}
+                Save Transaction
               </Button>
             </div>
           </form>

@@ -1,172 +1,169 @@
 
-import { DiamondLot, LotTransaction } from '../types/lot';
+import { DiamondLot, LotSummary, LotTransaction } from '../types/lot';
 
-// Helper function to generate lot IDs
-export const generateLotId = (): string => {
-  const prefix = 'LOT';
-  const year = new Date().getFullYear().toString().substring(2);
-  const randomDigits = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-  return `${prefix}-${year}-${randomDigits}`;
-};
-
-// Mock transactions for our lots
-const mockTransactions: Record<string, LotTransaction[]> = {
+// Mock transactions for each lot
+const lotTransactions: Record<string, LotTransaction[]> = {
   '1': [
     {
       id: 't1',
       lotId: '1',
+      date: '2025-01-20',
       type: 'SALE',
-      date: '2025-02-10',
-      carats: 2.5,
-      handler: 'Emma Johnson',
-      customer: 'Diamond Wholesalers Inc.',
-      price: 12500,
-      notes: 'Sale of 2.5 carats for custom engagement ring'
+      carats: 100,
+      handler: 'John Doe',
+      customer: 'Tiffany & Co',
+      price: 55000,
+      notes: 'Bulk purchase for new collection'
     },
     {
       id: 't2',
       lotId: '1',
+      date: '2025-02-05',
       type: 'SALE',
-      date: '2025-03-15',
-      carats: 3.2,
-      handler: 'Michael Chen',
-      customer: 'Luxury Jewelers',
-      price: 16800,
-      notes: 'Bulk purchase for earring collection'
+      carats: 200,
+      handler: 'Emma Johnson',
+      customer: 'Cartier',
+      price: 110000,
+      notes: 'Special order'
+    },
+    {
+      id: 't3',
+      lotId: '1',
+      date: '2025-02-15',
+      type: 'RETURN',
+      carats: 50,
+      handler: 'John Doe',
+      customer: 'Tiffany & Co',
+      reason: 'Quality issues with some pieces',
+      notes: 'Customer found inclusions in 5 stones'
     }
   ],
   '2': [
     {
-      id: 't3',
-      lotId: '2',
-      type: 'SALE',
-      date: '2025-02-28',
-      carats: 1.8,
-      handler: 'Emma Johnson',
-      customer: 'Elite Gems',
-      price: 7200,
-      notes: 'Selected for pendant design'
-    },
-    {
       id: 't4',
       lotId: '2',
-      type: 'RETURN',
-      date: '2025-03-05',
-      carats: 0.5,
-      handler: 'David Wilson',
-      customer: 'Elite Gems',
-      notes: 'Customer returned portion of lot due to size requirements'
-    }
-  ],
-  '3': [],
-  '4': [
+      date: '2025-02-25',
+      type: 'SALE',
+      carats: 75,
+      handler: 'Michael Chen',
+      customer: 'Blue Nile',
+      price: 48750,
+      notes: 'Online inventory restock'
+    },
     {
       id: 't5',
-      lotId: '4',
+      lotId: '2',
+      date: '2025-03-10',
       type: 'TRANSFER',
-      date: '2025-04-01',
-      carats: 12.0,
-      handler: 'Michael Chen',
-      notes: 'Transferred to cutting facility'
-    },
+      carats: 25,
+      handler: 'David Wilson',
+      notes: 'Transferred to New York office'
+    }
+  ],
+  '3': [
     {
       id: 't6',
-      lotId: '4',
-      type: 'RETURN',
-      date: '2025-04-08',
-      carats: 5.8,
-      handler: 'Michael Chen',
-      notes: 'Return from cutting - remaining material after processing'
-    },
-    {
-      id: 't7',
-      lotId: '4',
+      lotId: '3',
+      date: '2025-04-05',
       type: 'SALE',
-      date: '2025-04-15',
-      carats: 5.8,
+      carats: 150,
       handler: 'Emma Johnson',
-      customer: 'Diamond Exchange',
-      price: 29000,
-      notes: 'Sale of remaining material after cutting'
+      customer: 'Harry Winston',
+      price: 112500,
+      notes: 'Premier collection pieces'
     }
   ]
 };
 
-// Helper function to check if there's a discrepancy in lot data
-export const checkLotDiscrepancy = (lot: DiamondLot): boolean => {
-  const soldCarats = lot.transactions
-    .filter(t => t.type === 'SALE')
-    .reduce((sum, t) => sum + t.carats, 0);
-  
-  const returnedCarats = lot.transactions
-    .filter(t => t.type === 'RETURN')
-    .reduce((sum, t) => sum + t.carats, 0);
-  
-  const calculatedRemaining = lot.totalCarats - soldCarats + returnedCarats;
-  
-  // Check if there's a difference greater than a small tolerance
-  return Math.abs(calculatedRemaining - lot.remainingCarats) > 0.01;
-};
-
-// Mock diamond lots
+// Create mock lots with their transactions
 export const mockLots: DiamondLot[] = [
   {
     id: '1',
-    lotId: 'LOT-24-0001',
-    totalCarats: 10.0,
-    remainingCarats: 4.3,
+    lotId: 'LOT-2025-001',
+    totalCarats: 500,
     dateReceived: '2025-01-15',
-    source: 'African Diamond Suppliers',
-    initialValue: 45000,
-    handler: 'Emma Johnson',
+    source: 'De Beers',
+    initialValue: 250000,
+    remainingCarats: 250,
+    handler: 'John Doe',
     notes: 'High quality rough diamonds from Botswana',
-    lastModified: '2025-03-15',
-    transactions: mockTransactions['1']
+    lastModified: '2025-02-15',
+    transactions: lotTransactions['1']
   },
   {
     id: '2',
-    lotId: 'LOT-24-0002',
-    totalCarats: 5.0,
-    remainingCarats: 3.7, // Intentional discrepancy for testing
-    dateReceived: '2025-02-01',
-    source: 'Canadian Mines Ltd',
-    initialValue: 22000,
-    handler: 'David Wilson',
-    notes: 'Ethically sourced Canadian diamonds',
-    lastModified: '2025-03-05',
-    transactions: mockTransactions['2']
+    lotId: 'LOT-2025-002',
+    totalCarats: 300,
+    dateReceived: '2025-02-20',
+    source: 'ALROSA',
+    initialValue: 180000,
+    remainingCarats: 200,
+    handler: 'Michael Chen',
+    notes: 'Mixed quality, primarily for commercial jewelry',
+    lastModified: '2025-03-10',
+    transactions: lotTransactions['2']
   },
   {
     id: '3',
-    lotId: 'LOT-24-0003',
-    totalCarats: 8.5,
-    remainingCarats: 8.5,
-    dateReceived: '2025-03-10',
-    source: 'Antwerp Diamond Exchange',
-    initialValue: 36500,
-    handler: 'Michael Chen',
-    notes: 'Newly arrived, not yet processed',
-    lastModified: '2025-03-10',
-    transactions: mockTransactions['3']
+    lotId: 'LOT-2025-003',
+    totalCarats: 250,
+    dateReceived: '2025-03-30',
+    source: 'Rio Tinto',
+    initialValue: 187500,
+    remainingCarats: 100,
+    handler: 'Emma Johnson',
+    notes: 'Premium quality from Argyle mine',
+    lastModified: '2025-04-05',
+    transactions: lotTransactions['3']
   },
   {
     id: '4',
-    lotId: 'LOT-24-0004',
-    totalCarats: 15.0,
-    remainingCarats: 0.0,
-    dateReceived: '2025-03-20',
-    source: 'Russian Diamond Corp',
-    initialValue: 68000,
-    handler: 'Michael Chen',
-    notes: 'Premium quality rough diamonds, fully processed',
-    lastModified: '2025-04-15',
-    transactions: mockTransactions['4']
+    lotId: 'LOT-2025-004',
+    totalCarats: 600,
+    dateReceived: '2025-04-10',
+    source: 'Petra Diamonds',
+    initialValue: 330000,
+    remainingCarats: 600,
+    handler: 'David Wilson',
+    notes: 'New acquisition, not yet processed',
+    lastModified: '2025-04-10',
+    transactions: []
   }
 ];
 
-// Summary statistics
-export const totalLots = mockLots.length;
-export const activeLots = mockLots.filter(lot => lot.remainingCarats > 0).length;
-export const completedLots = mockLots.filter(lot => lot.remainingCarats === 0).length;
-export const totalCaratsInStock = mockLots.reduce((sum, lot) => sum + lot.remainingCarats, 0);
-export const totalLotValue = mockLots.reduce((sum, lot) => sum + lot.initialValue, 0);
+export const lotSummary: LotSummary = {
+  totalLots: mockLots.length,
+  totalCarats: mockLots.reduce((sum, lot) => sum + lot.totalCarats, 0),
+  soldCarats: mockLots.reduce((sum, lot) => sum + lot.transactions.filter(t => t.type === 'SALE').reduce((s, t) => s + t.carats, 0), 0),
+  returnedCarats: mockLots.reduce((sum, lot) => sum + lot.transactions.filter(t => t.type === 'RETURN').reduce((s, t) => s + t.carats, 0), 0),
+  remainingCarats: mockLots.reduce((sum, lot) => sum + lot.remainingCarats, 0),
+  totalValue: mockLots.reduce((sum, lot) => sum + lot.initialValue, 0)
+};
+
+// Generate a new lot ID based on the current year and month
+export function generateLotId(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const sequence = String(mockLots.length + 1).padStart(3, '0');
+  return `LOT-${year}-${month}-${sequence}`;
+}
+
+// Calculate remaining carats in a lot
+export function calculateRemainingCarats(lot: DiamondLot): number {
+  const sold = lot.transactions
+    .filter(t => t.type === 'SALE')
+    .reduce((sum, t) => sum + t.carats, 0);
+  
+  const returned = lot.transactions
+    .filter(t => t.type === 'RETURN')
+    .reduce((sum, t) => sum + t.carats, 0);
+  
+  return lot.totalCarats - sold + returned;
+}
+
+// Check if a lot has any discrepancies
+export function checkLotDiscrepancy(lot: DiamondLot): boolean {
+  const calculatedRemaining = calculateRemainingCarats(lot);
+  return calculatedRemaining !== lot.remainingCarats;
+}

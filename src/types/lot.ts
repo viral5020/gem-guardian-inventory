@@ -1,12 +1,12 @@
 
 export interface DiamondLot {
   id: string;
-  lotId: string;
+  lotId: string; // Unique identifier like LOT-2025-001
   totalCarats: number;
-  remainingCarats: number;
   dateReceived: string;
   source: string;
   initialValue: number;
+  remainingCarats: number;
   handler: string;
   notes?: string;
   lastModified: string;
@@ -16,23 +16,29 @@ export interface DiamondLot {
 export interface LotTransaction {
   id: string;
   lotId: string;
-  type: 'SALE' | 'RETURN' | 'TRANSFER';
   date: string;
+  type: 'SALE' | 'RETURN' | 'TRANSFER';
   carats: number;
   handler: string;
   customer?: string;
   price?: number;
+  reason?: string;
   notes?: string;
 }
 
-export type LotFilter = {
-  status?: 'ALL' | 'ACTIVE' | 'COMPLETED';
+export interface LotFilter {
   handler?: string;
-};
+  status?: 'ALL' | 'ACTIVE' | 'COMPLETED';
+  dateFrom?: string;
+  dateTo?: string;
+  source?: string;
+}
 
-export interface LotMetric {
-  title: string;
-  value: string | number;
-  change?: number;
-  icon: React.ComponentType<React.SVGAttributes<SVGElement>>;
+export type LotSummary = {
+  totalLots: number;
+  totalCarats: number;
+  soldCarats: number;
+  returnedCarats: number;
+  remainingCarats: number;
+  totalValue: number;
 }
