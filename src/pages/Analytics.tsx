@@ -1,12 +1,13 @@
-
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { BarChartIcon, PieChart as PieChartIcon, TrendingUp, DollarSign } from "lucide-react";
+import { BarChartIcon, PieChart as PieChartIcon, TrendingUp, DollarSign, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 
 // Mock data for analytics
 const inventoryByShape = [
@@ -55,7 +56,15 @@ const Analytics = () => {
       <Navbar />
       <main className="flex-1 container mx-auto py-6 px-4 md:px-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Analytics & Reporting</h1>
+          <div className="flex items-center space-x-4">
+            <h1 className="text-3xl font-bold">Analytics & Reporting</h1>
+            <Button variant="outline" size="sm" asChild className="flex items-center">
+              <Link to="/">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Dashboard
+              </Link>
+            </Button>
+          </div>
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Time Range" />
