@@ -28,14 +28,6 @@ const Navbar = () => {
             <span>Gem Guardian</span>
           </Link>
         </div>
-        <div className="mx-auto flex space-x-4">
-          <Button variant="ghost" asChild>
-            <Link to="/customers">Customer Management</Link>
-          </Button>
-          <Button variant="ghost" asChild>
-            <Link to="/analytics">Analytics & Reports</Link>
-          </Button>
-        </div>
         <div className="ml-auto flex items-center gap-4">
           <form className="hidden md:block">
             <div className="relative">
