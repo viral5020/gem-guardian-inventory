@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import CustomerManagement from "@/components/CustomerManagement";
@@ -20,7 +19,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus } from "lucide-react";
+import { Plus, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 
 // Mock data for the customer page
 const mockCustomers: Customer[] = [
@@ -300,7 +300,15 @@ const Customers = () => {
       <Navbar />
       <main className="flex-1 container mx-auto py-6 px-4 md:px-6">
         <div className="space-y-6">
-          <h1 className="text-3xl font-bold">Customer Relationship Management</h1>
+          <div className="flex items-center space-x-4">
+            <h1 className="text-3xl font-bold">Customer Relationship Management</h1>
+            <Button variant="outline" size="sm" asChild className="flex items-center">
+              <Link to="/">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Dashboard
+              </Link>
+            </Button>
+          </div>
           
           {customer ? (
             <div className="space-y-6">
