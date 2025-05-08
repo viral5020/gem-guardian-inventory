@@ -35,9 +35,6 @@ const Navbar = () => {
           <Button variant="ghost" asChild>
             <Link to="/analytics">Analytics & Reports</Link>
           </Button>
-          <Button variant="ghost" asChild>
-            <Link to="/lots">Diamond Lots</Link>
-          </Button>
         </div>
         <div className="ml-auto flex items-center gap-4">
           <form className="hidden md:block">

@@ -44,6 +44,9 @@ const Index = () => {
           <Button variant="outline" asChild>
             <Link to="/analytics">Analytics & Reports</Link>
           </Button>
+          <Button variant="outline" asChild>
+            <Link to="/lots">Diamond Lots</Link>
+          </Button>
         </div>
         
         {isAddingDiamond ? (
