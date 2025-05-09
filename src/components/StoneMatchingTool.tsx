@@ -54,6 +54,7 @@ const StoneMatchingTool: React.FC = () => {
   const [matchingSets, setMatchingSets] = useState<DiamondSet[]>([]);
   const [selectedSet, setSelectedSet] = useState<DiamondSet | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [noMatchesFound, setNoMatchesFound] = useState(false);
 
   const clarityRanking: Record<string, number> = {
     'FL': 10, 'IF': 9, 'VVS1': 8, 'VVS2': 7, 'VS1': 6, 'VS2': 5, 'SI1': 4, 'SI2': 3, 'I1': 2, 'I2': 1, 'I3': 0
@@ -120,12 +121,17 @@ const StoneMatchingTool: React.FC = () => {
 
   const findMatchingSets = () => {
     setIsSearching(true);
+    setNoMatchesFound(false);
+    setMatchingSets([]);
+    setSelectedSet(null);
     
     // Filter available diamonds first
     const availableDiamonds = mockDiamonds.filter(diamond => 
       diamond.status === 'Available' && 
       (criteria.shape === 'any' || diamond.shape === criteria.shape)
     );
+    
+    console.log(`Found ${availableDiamonds.length} available diamonds matching shape ${criteria.shape}`);
     
     // Group by shape
     const diamondsByShape: Record<string, Diamond[]> = {};
@@ -142,8 +148,12 @@ const StoneMatchingTool: React.FC = () => {
     
     // For each shape group, find matching sets
     Object.entries(diamondsByShape).forEach(([shape, diamonds]) => {
+      console.log(`Processing ${diamonds.length} diamonds of shape ${shape}`);
       // Skip if not enough diamonds for a set
-      if (diamonds.length < criteria.minPairs) return;
+      if (diamonds.length < criteria.minPairs) {
+        console.log(`Not enough diamonds of shape ${shape} (${diamonds.length}) for a set of ${criteria.minPairs}`);
+        return;
+      }
       
       // Sort by carat size to make matching easier
       diamonds.sort((a, b) => a.carat - b.carat);
@@ -155,7 +165,7 @@ const StoneMatchingTool: React.FC = () => {
         
         // Look for matching diamonds
         for (let j = 0; j < diamonds.length; j++) {
-          if (i === j) continue;
+          if (i === j) continue; // Skip comparing with itself
           
           const candidateDiamond = diamonds[j];
           
@@ -175,13 +185,11 @@ const StoneMatchingTool: React.FC = () => {
           if (criteria.cutMatch === 'exact' && baseDiamond.cut !== candidateDiamond.cut) continue;
           if (criteria.cutMatch === 'similar' && !isSimilarCut(baseDiamond.cut, candidateDiamond.cut)) continue;
           
+          // Diamond is a match, add to potential matches
           potentialMatches.push(candidateDiamond);
-          
-          // Stop if we have enough for a set
-          if (potentialMatches.length >= criteria.minPairs) break;
         }
         
-        // If we found enough matches, create a set
+        // Create a set if we found enough matches
         if (potentialMatches.length >= criteria.minPairs) {
           const totalCarats = potentialMatches.reduce((sum, d) => sum + d.carat, 0);
           const averagePrice = potentialMatches.reduce((sum, d) => sum + d.retailPrice, 0) / potentialMatches.length;
@@ -195,7 +203,9 @@ const StoneMatchingTool: React.FC = () => {
             averagePrice
           });
           
-          // Don't create overlapping sets
+          console.log(`Found matching set with ${potentialMatches.length} diamonds, score: ${matchScore}`);
+          
+          // Skip diamonds we've already used in this set to avoid duplicate sets
           i += potentialMatches.length - 1;
         }
       }
@@ -204,12 +214,14 @@ const StoneMatchingTool: React.FC = () => {
     // Sort sets by match score (highest first)
     sets.sort((a, b) => b.matchScore - a.matchScore);
     
+    console.log(`Found ${sets.length} matching sets in total`);
+    
     setMatchingSets(sets);
     setIsSearching(false);
     if (sets.length > 0) {
       setSelectedSet(sets[0]);
     } else {
-      setSelectedSet(null);
+      setNoMatchesFound(true);
     }
   };
 
@@ -339,8 +351,12 @@ const StoneMatchingTool: React.FC = () => {
               disabled={isSearching}
               className="px-8"
             >
-              <Search className="mr-2 h-4 w-4" />
-              Find Matching Sets
+              {isSearching ? "Searching..." : (
+                <>
+                  <Search className="mr-2 h-4 w-4" />
+                  Find Matching Sets
+                </>
+              )}
             </Button>
           </div>
         </CardContent>
@@ -467,7 +483,9 @@ const StoneMatchingTool: React.FC = () => {
         <Card>
           <CardContent className="p-6 text-center">
             <p className="text-muted-foreground">
-              Adjust your matching criteria and click "Find Matching Sets" to discover diamond pairs and sets.
+              {noMatchesFound ? 
+                "No matching sets found. Try adjusting your criteria for better results." : 
+                "Adjust your matching criteria and click \"Find Matching Sets\" to discover diamond pairs and sets."}
             </p>
           </CardContent>
         </Card>
