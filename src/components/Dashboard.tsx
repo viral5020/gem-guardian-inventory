@@ -1,5 +1,5 @@
 
-import { Diamond, Package, DollarSign, ShoppingBag, FileText } from "lucide-react";
+import { Diamond, Package, DollarSign, ShoppingBag, FileText, Gem } from "lucide-react";
 import DashboardCard from "./DashboardCard";
 import { totalDiamonds, availableDiamonds, onMemoDiamonds, totalInventoryValue } from "@/data/mockDiamonds";
 import DiamondList from "./DiamondList";
@@ -55,6 +55,12 @@ const Dashboard = ({ onSelectDiamond }: DashboardProps) => {
               <Link to="/billing">
                 <FileText className="mr-1 h-4 w-4" />
                 Billing & Invoices
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/stone-matching">
+                <Gem className="mr-1 h-4 w-4" />
+                Stone Matching
               </Link>
             </Button>
           </div>

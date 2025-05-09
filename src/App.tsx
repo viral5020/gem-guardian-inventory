@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import DiamondLots from "./pages/DiamondLots";
 import Billing from "./pages/Billing";
+import StoneMatching from "./pages/StoneMatching";
 import React from "react";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/lots" element={<DiamondLots />} />
             <Route path="/billing" element={<Billing />} />
+            <Route path="/stone-matching" element={<StoneMatching />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
