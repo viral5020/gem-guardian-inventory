@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Invoice } from '@/types/invoice';
 import { mockInvoices } from '@/data/mockInvoices';
-import { Navbar } from '@/components/Navbar';
+import Navbar from '@/components/Navbar';
 import InvoiceList from '@/components/InvoiceList';
 import InvoiceDetail from '@/components/InvoiceDetail';
 import InvoiceForm from '@/components/InvoiceForm';

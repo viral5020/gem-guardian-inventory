@@ -105,7 +105,7 @@ const InvoiceForm = ({ existingInvoice, onSubmit, onCancel, customers }: Invoice
       // Calculate each item's amount based on quantity and unit price
       const updatedItems = watchItems.map(item => ({
         ...item,
-        amount: item.quantity * item.unitPrice
+        amount: Number(item.quantity || 0) * Number(item.unitPrice || 0)
       }));
       
       // Update each item's amount
@@ -116,11 +116,11 @@ const InvoiceForm = ({ existingInvoice, onSubmit, onCancel, customers }: Invoice
       // Calculate and update summary
       const summary = calculateInvoiceSummary(
         updatedItems, 
-        watchDiscount,
+        Number(watchDiscount || 0),
         taxRate,
-        watchShipping,
-        watchInsurance,
-        watchOther
+        Number(watchShipping || 0),
+        Number(watchInsurance || 0),
+        Number(watchOther || 0)
       );
       
       Object.entries(summary).forEach(([key, value]) => {

@@ -1,5 +1,4 @@
-
-import { Invoice, InvoiceItem } from '@/types/invoice';
+import { Invoice, InvoiceItem, InvoiceSummary } from '@/types/invoice';
 
 // Mock invoice items
 const createMockItems = (invoiceId: string): InvoiceItem[] => [
