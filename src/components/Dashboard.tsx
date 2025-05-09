@@ -1,5 +1,5 @@
 
-import { Diamond, Package, DollarSign, ShoppingBag } from "lucide-react";
+import { Diamond, Package, DollarSign, ShoppingBag, FileText } from "lucide-react";
 import DashboardCard from "./DashboardCard";
 import { totalDiamonds, availableDiamonds, onMemoDiamonds, totalInventoryValue } from "@/data/mockDiamonds";
 import DiamondList from "./DiamondList";
@@ -47,9 +47,17 @@ const Dashboard = ({ onSelectDiamond }: DashboardProps) => {
       <div className="py-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold">Recently Added Diamonds</h2>
-          <Button variant="outline" asChild>
-            <Link to="/lots">Manage Diamond Lots</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" asChild>
+              <Link to="/lots">Manage Diamond Lots</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/billing">
+                <FileText className="mr-1 h-4 w-4" />
+                Billing & Invoices
+              </Link>
+            </Button>
+          </div>
         </div>
         <DiamondList 
           showFilters={false} 

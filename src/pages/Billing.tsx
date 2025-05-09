@@ -7,6 +7,20 @@ import InvoiceList from '@/components/InvoiceList';
 import InvoiceDetail from '@/components/InvoiceDetail';
 import InvoiceForm from '@/components/InvoiceForm';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import { FileText, ArrowLeft } from 'lucide-react';
 
@@ -46,6 +60,8 @@ const Billing = () => {
   const [view, setView] = useState<BillingView>(BillingView.LIST);
   const [invoices, setInvoices] = useState<Invoice[]>(mockInvoices);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<Invoice['status']>('DRAFT');
   const { toast } = useToast();
 
   const goToList = () => {
@@ -86,9 +102,41 @@ const Billing = () => {
     goToList();
   };
 
+  const handleUpdateStatus = () => {
+    if (selectedInvoiceId) {
+      setInvoices(invoices.map(invoice => 
+        invoice.id === selectedInvoiceId 
+          ? { ...invoice, status: selectedStatus, updatedAt: new Date().toISOString() }
+          : invoice
+      ));
+      
+      // If marking as paid, add the paidAt date
+      if (selectedStatus === 'PAID') {
+        setInvoices(invoices.map(invoice => 
+          invoice.id === selectedInvoiceId 
+            ? { ...invoice, paidAt: new Date().toISOString() }
+            : invoice
+        ));
+      }
+      
+      toast({
+        title: "Status Updated",
+        description: `Invoice status has been updated to ${selectedStatus}.`
+      });
+      setStatusDialogOpen(false);
+    }
+  };
+
   const selectedInvoice = selectedInvoiceId 
     ? invoices.find(invoice => invoice.id === selectedInvoiceId) 
     : null;
+
+  const handleOpenStatusDialog = () => {
+    if (selectedInvoice) {
+      setSelectedStatus(selectedInvoice.status);
+      setStatusDialogOpen(true);
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -114,10 +162,56 @@ const Billing = () => {
         )}
 
         {view === BillingView.DETAIL && selectedInvoice && (
-          <InvoiceDetail 
-            invoice={selectedInvoice} 
-            onBack={goToList} 
-          />
+          <div className="space-y-4">
+            <div className="flex justify-end">
+              <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button onClick={handleOpenStatusDialog} variant="outline">
+                    Update Status
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Update Invoice Status</DialogTitle>
+                  </DialogHeader>
+                  <div className="py-4 space-y-4">
+                    <div className="space-y-2">
+                      <label htmlFor="status" className="text-sm font-medium">
+                        Status
+                      </label>
+                      <Select
+                        value={selectedStatus}
+                        onValueChange={(value) => setSelectedStatus(value as Invoice['status'])}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="DRAFT">Draft</SelectItem>
+                          <SelectItem value="SENT">Sent</SelectItem>
+                          <SelectItem value="PAID">Paid</SelectItem>
+                          <SelectItem value="OVERDUE">Overdue</SelectItem>
+                          <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex justify-end">
+                      <Button onClick={handleUpdateStatus}>
+                        Update Status
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <Button onClick={() => handleEditInvoice(selectedInvoice.id)} className="ml-2">
+                Edit Invoice
+              </Button>
+            </div>
+            <InvoiceDetail 
+              invoice={selectedInvoice} 
+              onBack={goToList} 
+            />
+          </div>
         )}
 
         {(view === BillingView.CREATE || view === BillingView.EDIT) && (
