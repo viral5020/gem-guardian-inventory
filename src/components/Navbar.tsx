@@ -1,10 +1,45 @@
 
-import { Bell, Search, User } from "lucide-react";
+import { Bell, Search, User, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const navigate = useNavigate();
+
+  // Check authentication status on mount
+  useEffect(() => {
+    const authStatus = localStorage.getItem("isAuthenticated") === "true";
+    setIsAuthenticated(authStatus);
+
+    if (authStatus) {
+      try {
+        const userData = JSON.parse(localStorage.getItem("user") || "{}");
+        setUserEmail(userData.email || "");
+      } catch (e) {
+        console.error("Error parsing user data", e);
+      }
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("user");
+    setIsAuthenticated(false);
+    setUserEmail("");
+    navigate("/");
+  };
+
+  const handleLogin = () => {
+    navigate("/login");
+  };
+
   return (
     <div className="border-b bg-white">
       <div className="flex h-16 items-center px-4 md:px-6">
@@ -43,9 +78,53 @@ const Navbar = () => {
             <Bell className="h-5 w-5" />
             <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-gem-gold" />
           </Button>
-          <Button variant="ghost" size="icon">
-            <User className="h-5 w-5" />
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                {isAuthenticated ? (
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {userEmail.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                ) : (
+                  <User className="h-5 w-5" />
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56" align="end">
+              <div className="space-y-3">
+                {isAuthenticated ? (
+                  <>
+                    <div className="border-b pb-2">
+                      <p className="text-sm font-medium">{userEmail}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start"
+                        onClick={handleLogout}
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Log out</span>
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-1">
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start"
+                      onClick={handleLogin}
+                    >
+                      <LogIn className="mr-2 h-4 w-4" />
+                      <span>Log in</span>
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
     </div>
